@@ -412,6 +412,34 @@
   line-height: 1.5;
 }
 
+/* ===== Clickable feature cards ===== */
+
+.feature-card--clickable {
+  cursor: pointer;
+  position: relative;
+}
+
+.feature-card--clickable:hover {
+  border-color: var(--accent-farmer);
+  box-shadow: 0 6px 24px rgba(46, 158, 80, 0.14);
+  transform: translateY(-4px);
+}
+
+.feature-card-arrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-farmer);
+  margin-top: 4px;
+  transition: gap var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feature-card--clickable:hover .feature-card-arrow {
+  gap: 8px;
+}
+
 /* ===== Responsive ===== */
 
 @media (max-width: 640px) {

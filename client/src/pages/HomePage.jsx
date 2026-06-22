@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom'
 import { icons } from '../components/ui/icons'
 import { InstallButton } from '../pwa/InstallButton'
 
-export function HomePage({ onNavigate }) {
+export function HomePage() {
+  const navigate = useNavigate()
+
   return (
     <main className="home-page" id="home-page">
       {/* PWA install button — top right */}
@@ -25,7 +28,7 @@ export function HomePage({ onNavigate }) {
         <button
           id="admin-portal-card"
           className="portal-card portal-card--admin"
-          onClick={() => onNavigate('admin')}
+          onClick={() => navigate('/admin')}
           type="button"
         >
           <div className="portal-icon">{icons.settings}</div>
@@ -43,7 +46,7 @@ export function HomePage({ onNavigate }) {
         <button
           id="farmer-portal-card"
           className="portal-card portal-card--farmer"
-          onClick={() => onNavigate('farmer')}
+          onClick={() => navigate('/farmer')}
           type="button"
         >
           <div className="portal-icon">{icons.farmer}</div>

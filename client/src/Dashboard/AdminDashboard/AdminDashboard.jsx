@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { icons } from '../../components/ui/icons'
 import { InstallButton } from '../../pwa/InstallButton'
 
@@ -28,7 +29,9 @@ const adminFeatures = [
   },
 ]
 
-export function AdminDashboard({ onBack }) {
+export function AdminDashboard() {
+  const navigate = useNavigate()
+
   return (
     <div className="dashboard-view" id="admin-dashboard">
       {/* Top bar */}
@@ -42,7 +45,7 @@ export function AdminDashboard({ onBack }) {
           <button
             type="button"
             className="topbar-back-btn"
-            onClick={onBack}
+            onClick={() => navigate('/')}
             id="admin-back-button"
           >
             ← Back
