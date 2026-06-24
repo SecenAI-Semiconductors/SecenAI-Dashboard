@@ -402,6 +402,28 @@ export function DronePestDetection({ onBack }) {
       {/* ──── Hero / Scan Summary ──── */}
       <section className="pest-hero" id="pest-hero">
         <div className="pest-hero-inner">
+          {/* ──── Drone Footage Video ──── */}
+          <div className="pest-hero-video-wrap" id="pest-drone-video">
+            <video
+              className="pest-hero-video"
+              src="https://res.cloudinary.com/dil1zgzdb/video/upload/v1782214985/corn1_zmbozl.mp4"
+              controls
+              muted
+              playsInline
+              preload="metadata"
+              poster=""
+            />
+            <div className="pest-video-label">
+              <span className="pest-video-badge">
+                🎥 Drone Footage
+              </span>
+              <span className="pest-video-badge pest-video-badge--source">
+                SecenAI AgriDrone X4 · {d.scanInfo.scanDate}
+              </span>
+            </div>
+          </div>
+
+          {/* ──── AI Analysed Image ──── */}
           <div className="pest-hero-image-wrap">
             <img
               src={PestImage}

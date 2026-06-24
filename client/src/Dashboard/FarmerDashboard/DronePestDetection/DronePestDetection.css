@@ -65,6 +65,55 @@
   gap: 28px;
 }
 
+/* ──── Drone footage video ──── */
+.pest-hero-video-wrap {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--pest-card-border);
+  background: #0a0a0a;
+}
+
+.pest-hero-video {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+  max-height: 480px;
+  object-fit: contain;
+  background: #0a0a0a;
+}
+
+.pest-video-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), transparent);
+  pointer-events: none;
+}
+
+.pest-video-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  background: rgba(46, 158, 80, 0.25);
+  color: #a5f0c5;
+  border: 1px solid rgba(46, 158, 80, 0.35);
+}
+
+.pest-video-badge--source {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
 /* ──── Image wrapper ──── */
 .pest-hero-image-wrap {
   position: relative;
