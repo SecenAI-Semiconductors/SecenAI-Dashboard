@@ -9,8 +9,10 @@ lerna-debug.log*
 
 client/node_modules
 client/dist
+client/.env
 client/dev-dist
 server/node_modules
+server/.env
 .env
 
 # Editor directories and files

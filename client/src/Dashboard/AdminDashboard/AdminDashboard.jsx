@@ -8,24 +8,28 @@ const adminFeatures = [
     title: 'Farmer & Field Management',
     desc: 'Manage farmer profiles, field records, and onboarding workflows.',
     icon: icons.farmerMgmt,
+    route: '/admin/farmer-management',
   },
   {
     id: 'drone-operations',
     title: 'Drone Operations',
     desc: 'Schedule flights, monitor drone fleets, and review mission logs.',
     icon: icons.droneOps,
+    route: null,
   },
   {
     id: 'crop-yield-analytics',
     title: 'Crop & Yield Analytics',
     desc: 'Track crop performance, harvest forecasts, and yield comparisons.',
     icon: icons.cropYield,
+    route: null,
   },
   {
     id: 'disease-pest-analytics',
     title: 'Disease & Pest Analytics',
     desc: 'Analyze outbreak patterns, risk heat-maps, and treatment effectiveness.',
     icon: icons.disease,
+    route: null,
   },
 ]
 
@@ -65,11 +69,18 @@ export function AdminDashboard() {
             <div
               key={f.id}
               id={f.id}
-              className="feature-card feature-card--admin"
+              className={`feature-card feature-card--admin${f.route ? ' feature-card--clickable' : ''}`}
+              onClick={f.route ? () => navigate(f.route) : undefined}
+              style={f.route ? { cursor: 'pointer' } : undefined}
             >
               <div className="feature-card-icon">{f.icon}</div>
               <span className="feature-card-title">{f.title}</span>
               <span className="feature-card-desc">{f.desc}</span>
+              {f.route && (
+                <span className="feature-card-arrow">
+                  Manage →
+                </span>
+              )}
             </div>
           ))}
         </div>
