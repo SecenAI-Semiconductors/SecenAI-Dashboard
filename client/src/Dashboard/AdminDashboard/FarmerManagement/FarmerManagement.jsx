@@ -172,7 +172,12 @@ export function FarmerManagement() {
       {/* ── Top bar (matches existing admin layout) ── */}
       <nav className="dashboard-topbar">
         <div className="topbar-left">
-          <div className="topbar-brand-icon">S</div>
+          <div
+            className="topbar-brand-icon"
+            onClick={() => navigate('/')}
+            title="Go to home"
+            style={{ cursor: 'pointer' }}
+          >S</div>
           <span className="topbar-title">Farmer Management</span>
         </div>
         <div className="topbar-right">

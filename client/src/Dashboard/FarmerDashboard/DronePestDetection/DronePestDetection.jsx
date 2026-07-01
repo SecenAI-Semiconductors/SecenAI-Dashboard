@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import PestImage from '../../../assets/Pest.png'
 import './DronePestDetection.css'
 
@@ -363,6 +364,7 @@ function HealthRing({ score }) {
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
 export function DronePestDetection({ onBack }) {
+  const navigate = useNavigate()
   const d = pestAnalysisData
   const [openSections, setOpenSections] = useState(new Set())
 
@@ -381,7 +383,14 @@ export function DronePestDetection({ onBack }) {
       {/* ──── Top Bar ──── */}
       <nav className="dashboard-topbar pest-topbar">
         <div className="topbar-left">
-          <div className="topbar-brand-icon">S</div>
+          <div
+            className="topbar-brand-icon"
+            onClick={() => navigate('/')}
+            title="Go to home"
+            style={{ cursor: 'pointer' }}
+          >
+            S
+          </div>
           <span className="topbar-title">Drone Pest Detection</span>
         </div>
         <div className="topbar-right">
@@ -391,7 +400,7 @@ export function DronePestDetection({ onBack }) {
           <button
             type="button"
             className="topbar-back-btn"
-            onClick={onBack}
+            onClick={onBack ?? (() => navigate('/farmer'))}
             id="pest-back-button"
           >
             ← Back

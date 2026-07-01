@@ -438,8 +438,13 @@
 }
 
 @keyframes fm-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ===== Modal Overlay ===== */
@@ -458,15 +463,20 @@
 }
 
 @keyframes fm-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .fm-modal {
   background: #fff;
   border-radius: var(--radius-lg);
   width: 100%;
-  max-width: 520px;
+  max-width: 650px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -474,8 +484,15 @@
 }
 
 @keyframes fm-slide-up {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fm-modal-header {
@@ -659,7 +676,9 @@
 }
 
 @keyframes fm-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ===== View Drawer ===== */
@@ -689,8 +708,13 @@
 }
 
 @keyframes fm-slide-in-right {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
 }
 
 .fm-drawer-header {
@@ -879,13 +903,27 @@
 }
 
 @keyframes fm-toast-in {
-  from { opacity: 0; transform: translateX(40px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes fm-toast-out {
-  from { opacity: 1; transform: translateX(0); }
-  to { opacity: 0; transform: translateX(40px); }
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(40px);
+  }
 }
 
 .fm-toast--success {
@@ -982,6 +1020,7 @@
 }
 
 @media (max-width: 640px) {
+
   .fm-table th:nth-child(4),
   .fm-table td:nth-child(4),
   .fm-table th:nth-child(6),
