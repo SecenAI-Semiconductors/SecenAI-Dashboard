@@ -1,0 +1,162 @@
+/* ===== Language Switcher — Navbar Widget ===== */
+
+.language-switcher {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Custom dropdown trigger ── */
+
+.language-switcher-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.language-switcher-btn:hover,
+.language-switcher-btn:focus-visible {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: var(--accent-green-soft);
+  outline: none;
+}
+
+.language-switcher-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-green-glow);
+}
+
+/* Globe icon */
+.language-switcher-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Chevron arrow */
+.language-switcher-chevron {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.language-switcher--open .language-switcher-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Dropdown menu ── */
+
+.language-switcher-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 1000;
+  min-width: 160px;
+  padding: 6px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--transition-fast),
+    visibility var(--transition-fast),
+    transform var(--transition-fast);
+  list-style: none;
+}
+
+.language-switcher--open .language-switcher-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ── Menu items ── */
+
+.language-switcher-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+  text-align: left;
+}
+
+.language-switcher-option:hover,
+.language-switcher-option:focus-visible {
+  background: var(--accent-green-soft);
+  color: var(--accent-green);
+  outline: none;
+}
+
+.language-switcher-option--active {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.language-switcher-option--active::after {
+  content: '✓';
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--accent-green);
+}
+
+/* ── Hidden GTranslate wrapper (off-screen, functional only) ── */
+
+.language-switcher .gtranslate_wrapper {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 640px) {
+  .language-switcher-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .language-switcher-label {
+    /* Hide the text label on small screens, show only the globe icon */
+    display: none;
+  }
+
+  .language-switcher-menu {
+    min-width: 140px;
+    right: -8px;
+  }
+}

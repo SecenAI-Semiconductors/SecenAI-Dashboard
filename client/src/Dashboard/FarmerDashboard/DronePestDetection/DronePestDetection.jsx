@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import PestImage from '../../../assets/Pest.png'
 import './DronePestDetection.css'
 
@@ -363,8 +362,7 @@ function HealthRing({ score }) {
 /* ═══════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════ */
-export function DronePestDetection({ onBack }) {
-  const navigate = useNavigate()
+export function DronePestDetection() {
   const d = pestAnalysisData
   const [openSections, setOpenSections] = useState(new Set())
 
@@ -380,34 +378,6 @@ export function DronePestDetection({ onBack }) {
 
   return (
     <div className="pest-detection-page" id="drone-pest-detection-page">
-      {/* ──── Top Bar ──── */}
-      <nav className="dashboard-topbar pest-topbar">
-        <div className="topbar-left">
-          <div
-            className="topbar-brand-icon"
-            onClick={() => navigate('/')}
-            title="Go to home"
-            style={{ cursor: 'pointer' }}
-          >
-            S
-          </div>
-          <span className="topbar-title">Drone Pest Detection</span>
-        </div>
-        <div className="topbar-right">
-          <span className="pest-scan-badge" id="scan-badge">
-            Scan #{d.scanInfo.scanId}
-          </span>
-          <button
-            type="button"
-            className="topbar-back-btn"
-            onClick={onBack ?? (() => navigate('/farmer'))}
-            id="pest-back-button"
-          >
-            ← Back
-          </button>
-        </div>
-      </nav>
-
       {/* ──── Hero / Scan Summary ──── */}
       <section className="pest-hero" id="pest-hero">
         <div className="pest-hero-inner">

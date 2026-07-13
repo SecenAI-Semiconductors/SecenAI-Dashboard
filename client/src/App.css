@@ -11,20 +11,6 @@
   overflow: hidden;
 }
 
-/* PWA install button — top-right corner of home page */
-.home-install-btn {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  z-index: 10;
-}
-
-/* Dashboard topbar right section */
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 
 /* Subtle green gradient background */
 .home-page::before {
@@ -253,63 +239,6 @@
   flex-direction: column;
 }
 
-/* ===== Dashboard Top Bar ===== */
-
-.dashboard-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 32px;
-  background: #ffffff;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.topbar-brand-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #22783c, #2e9e50);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.topbar-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.topbar-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.topbar-back-btn:hover {
-  border-color: var(--accent-green);
-  color: var(--accent-green);
-  background: var(--accent-green-soft);
-}
 
 /* ===== Dashboard Content ===== */
 
@@ -464,9 +393,7 @@
     margin-top: 36px;
   }
 
-  .dashboard-topbar {
-    padding: 12px 16px;
-  }
+
 
   .dashboard-content {
     padding: 24px 16px;

@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { InstallButton } from '../../../pwa/InstallButton'
 import farmerService from '../../../services/farmerService'
 import { FarmerTable, TableSkeleton } from './FarmerTable'
 import { FarmerModal } from './FarmerModal'
@@ -14,7 +12,6 @@ import './FarmerManagement.css'
  * Handles all CRUD operations, search, loading states, and error handling.
  */
 export function FarmerManagement() {
-  const navigate = useNavigate()
   const { toasts, showToast, dismissToast } = useToast()
 
   // ── Data state ──
@@ -169,30 +166,6 @@ export function FarmerManagement() {
 
   return (
     <div className="dashboard-view" id="farmer-management-page">
-      {/* ── Top bar (matches existing admin layout) ── */}
-      <nav className="dashboard-topbar">
-        <div className="topbar-left">
-          <div
-            className="topbar-brand-icon"
-            onClick={() => navigate('/')}
-            title="Go to home"
-            style={{ cursor: 'pointer' }}
-          >S</div>
-          <span className="topbar-title">Farmer Management</span>
-        </div>
-        <div className="topbar-right">
-          <InstallButton />
-          <button
-            type="button"
-            className="topbar-back-btn"
-            onClick={() => navigate('/admin')}
-            id="fm-back-button"
-          >
-            ← Back
-          </button>
-        </div>
-      </nav>
-
       {/* ── Page content ── */}
       <section className="dashboard-content" style={{ maxWidth: 1200 }}>
         {/* Header */}
