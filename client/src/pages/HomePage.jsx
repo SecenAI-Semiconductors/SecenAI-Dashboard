@@ -1,17 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { icons } from '../components/ui/icons'
-import { InstallButton } from '../pwa/InstallButton'
 
 export function HomePage() {
   const navigate = useNavigate()
 
   return (
     <main className="home-page" id="home-page">
-      {/* PWA install button — top right */}
-      <div className="home-install-btn">
-        <InstallButton />
-      </div>
-
       <header className="home-header">
         <div className="home-brand">
           <div className="home-brand-icon">S</div>

@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { icons } from '../../components/ui/icons'
-import { InstallButton } from '../../pwa/InstallButton'
 
 const adminFeatures = [
   {
@@ -38,32 +37,6 @@ export function AdminDashboard() {
 
   return (
     <div className="dashboard-view" id="admin-dashboard">
-      {/* Top bar */}
-      <nav className="dashboard-topbar">
-        <div className="topbar-left">
-          <div
-            className="topbar-brand-icon"
-            onClick={() => navigate('/')}
-            title="Go to home"
-            style={{ cursor: 'pointer' }}
-          >
-            S
-          </div>
-          <span className="topbar-title">Admin Dashboard</span>
-        </div>
-        <div className="topbar-right">
-          <InstallButton />
-          <button
-            type="button"
-            className="topbar-back-btn"
-            onClick={() => navigate('/')}
-            id="admin-back-button"
-          >
-            ← Back
-          </button>
-        </div>
-      </nav>
-
       {/* Content */}
       <section className="dashboard-content">
         <h1 className="dashboard-heading">Platform Management</h1>
