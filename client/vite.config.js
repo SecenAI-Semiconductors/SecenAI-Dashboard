@@ -59,4 +59,16 @@ export default defineConfig({
       },
     }),
   ],
+
+  // Dev proxy — forwards /api/agmarknet to data.gov.in to bypass CORS
+  server: {
+    proxy: {
+      '/api/agmarknet': {
+        target: 'https://api.data.gov.in',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/agmarknet/, ''),
+        secure: true,
+      },
+    },
+  },
 })

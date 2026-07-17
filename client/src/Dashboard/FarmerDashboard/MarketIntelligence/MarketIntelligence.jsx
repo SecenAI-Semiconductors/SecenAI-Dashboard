@@ -1,13 +1,10 @@
 import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { InstallButton } from '../../../pwa/InstallButton'
 import { fetchMandiPrices } from '../../../services/agmarknetService'
 import './MarketIntelligence.css'
 
-const ITEMS_PER_PAGE = 20
+const ITEMS_PER_PAGE = 10
 
 export function MarketIntelligence() {
-  const navigate = useNavigate()
 
   // Filter state
   const [commodity, setCommodity] = useState('')
@@ -85,24 +82,6 @@ export function MarketIntelligence() {
 
   return (
     <div className="market-intel-page" id="market-intelligence-page">
-      {/* ──── Top bar ──── */}
-      <nav className="dashboard-topbar market-topbar">
-        <div className="topbar-left">
-          <div className="topbar-brand-icon">S</div>
-          <span className="topbar-title">Market Intelligence</span>
-        </div>
-        <div className="topbar-right">
-          <InstallButton />
-          <button
-            type="button"
-            className="topbar-back-btn"
-            onClick={() => navigate('/farmer')}
-            id="market-back-button"
-          >
-            ← Back
-          </button>
-        </div>
-      </nav>
 
       {/* ──── Content ──── */}
       <section className="market-intel-content">

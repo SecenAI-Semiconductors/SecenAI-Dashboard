@@ -3,14 +3,14 @@ import axios from 'axios'
 /**
  * AGMARKNET Mandi Price Service
  *
- * Calls the data.gov.in Open Government Data API directly from the browser.
- * Resource: "Current Daily Price of Various Commodities from Various Markets (Mandi)"
+ * Calls the data.gov.in Open Government Data API via the Vite dev proxy
+ * to bypass CORS. The proxy is configured in vite.config.js:
+ *   /api/agmarknet/* → https://api.data.gov.in/*
  *
- * No backend changes — this is a pure frontend call.
+ * No backend changes — this is a pure frontend + dev-tooling call.
  */
 
 const RESOURCE_ID = '9ef84268-d588-465a-a308-a864a43d0070'
-const BASE_URL = 'https://api.data.gov.in/resource'
 
 /**
  * Fetch mandi prices from data.gov.in
@@ -20,7 +20,7 @@ const BASE_URL = 'https://api.data.gov.in/resource'
  * @param {string} [params.state]     - Filter by state name
  * @param {string} [params.district]  - Filter by district name
  * @param {string} [params.market]    - Filter by market/APMC name
- * @param {number} [params.limit=20]  - Results per page
+ * @param {number} [params.limit=10]  - Results per page
  * @param {number} [params.offset=0]  - Pagination offset
  * @returns {Promise<{ records: Array, total: number, count: number }>}
  */
@@ -29,7 +29,7 @@ export async function fetchMandiPrices({
   state = '',
   district = '',
   market = '',
-  limit = 20,
+  limit = 10,
   offset = 0,
 } = {}) {
   const apiKey = import.meta.env.VITE_AGMARKNET_API_KEY
@@ -49,35 +49,38 @@ export async function fetchMandiPrices({
   }
 
   // Apply optional filters (data.gov.in uses filters[field_name] syntax)
-  if (state.trim()) params['filters[state]'] = state.trim()
+  if (state.trim()) params['filters[state.keyword]'] = state.trim()
   if (district.trim()) params['filters[district]'] = district.trim()
   if (market.trim()) params['filters[market]'] = market.trim()
   if (commodity.trim()) params['filters[commodity]'] = commodity.trim()
 
-  const url = `${BASE_URL}/${RESOURCE_ID}`
+  // Use Vite dev proxy to bypass CORS: /api/agmarknet → https://api.data.gov.in
+  const url = `/api/agmarknet/resource/${RESOURCE_ID}`
 
-  try {
-    // Try direct call first
-    const response = await axios.get(url, { params, timeout: 15000 })
-    return normalizeResponse(response.data)
-  } catch (err) {
-    // If CORS blocks, try via allorigins proxy
-    if (err.message?.includes('Network Error') || err.code === 'ERR_NETWORK') {
-      const queryString = new URLSearchParams(params).toString()
-      const proxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-        `${url}?${queryString}`
-      )}`
-
-      const proxyResponse = await axios.get(proxiedUrl, { timeout: 20000 })
-      const data =
-        typeof proxyResponse.data === 'string'
-          ? JSON.parse(proxyResponse.data)
-          : proxyResponse.data
-      return normalizeResponse(data)
+  // Retry up to 2 times on 429 (rate limit) with a delay
+  let lastError
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      if (attempt > 0) {
+        // Wait before retrying (3s for 2nd attempt, 6s for 3rd)
+        await new Promise((r) => setTimeout(r, 3000 * attempt))
+      }
+      const response = await axios.get(url, { params, timeout: 15000 })
+      return normalizeResponse(response.data)
+    } catch (err) {
+      lastError = err
+      if (err.response?.status !== 429) break // only retry on rate limit
     }
-
-    throw err
   }
+
+  // If we exhausted retries on 429, give a friendly message
+  if (lastError?.response?.status === 429) {
+    throw new Error(
+      'Rate limit exceeded — the sample API key allows limited requests. Please wait a minute and try again, or register your own key at data.gov.in.'
+    )
+  }
+
+  throw lastError
 }
 
 /**
