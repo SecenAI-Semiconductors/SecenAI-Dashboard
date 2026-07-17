@@ -28,7 +28,7 @@ const farmerFeatures = [
     title: 'Market Intelligence',
     desc: 'Current market prices, demand forecasts, and trade insights.',
     icon: icons.market,
-    route: null,
+    route: '/farmer/market-intelligence',
   },
   {
     id: 'crop-insurance',
