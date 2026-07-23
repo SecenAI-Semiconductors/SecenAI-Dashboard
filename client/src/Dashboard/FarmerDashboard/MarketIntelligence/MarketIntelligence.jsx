@@ -18,7 +18,7 @@ import { useMarketData } from './hooks/useMarketData'
 import { BestSellingCards } from './components/BestSellingCards'
 import { AIRecommendation } from './components/AIRecommendation'
 import { PriceTrendChart } from './components/PriceTrendChart'
-import { NearbyMarkets } from './components/NearbyMarkets'
+import { MarketMap } from './components/MarketMap/MarketMap'
 import { MarketTable } from './components/MarketTable'
 import {
   SkeletonHero,
@@ -177,8 +177,8 @@ export function MarketIntelligence() {
             {/* Section 3: Price Trend */}
             <PriceTrendChart chartData={chartData} />
 
-            {/* Section 4: Nearby Markets */}
-            <NearbyMarkets records={nearbyMarkets} />
+            {/* Section 4: Market Map (replaces Nearby Markets) */}
+            <MarketMap records={rawRecords} />
 
             {/* Section 5: All Market Prices */}
             <MarketTable records={rawRecords} />
