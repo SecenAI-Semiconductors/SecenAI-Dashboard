@@ -21,6 +21,7 @@ const ROUTE_CONFIG = {
   '/farmer':                      { title: 'Farmer Dashboard',     backTo: '/' },
   '/farmer/drone-pest-detection': { title: 'Drone Pest Detection', backTo: '/farmer' },
   '/farmer/market-intelligence':  { title: 'Market Intelligence',  backTo: '/farmer' },
+  '/farmer/weather-intelligence': { title: 'Weather Intelligence', backTo: '/farmer' },
 }
 
 /* Fallback for unknown routes */
