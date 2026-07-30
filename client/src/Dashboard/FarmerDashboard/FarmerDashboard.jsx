@@ -14,7 +14,7 @@ const farmerFeatures = [
     title: 'Weather & Irrigation',
     desc: 'Live weather forecasts and smart irrigation scheduling.',
     icon: icons.weather,
-    route: null,
+    route: '/farmer/weather-intelligence',
   },
   {
     id: 'drone-pest-detection',

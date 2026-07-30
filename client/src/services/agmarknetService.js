@@ -55,8 +55,7 @@ export async function fetchMandiPrices({
   if (commodity.trim()) params['filters[commodity]'] = commodity.trim()
 
   // Use Vite dev proxy to bypass CORS: /api/agmarknet → https://api.data.gov.in
-  const url = `/api/agmarknet/resource/${RESOURCE_ID}`
-
+const url = `https://api.data.gov.in/resource/${RESOURCE_ID}`
   // Retry up to 2 times on 429 (rate limit) with a delay
   let lastError
   for (let attempt = 0; attempt < 3; attempt++) {
