@@ -8,6 +8,7 @@ import { FarmerDashboard } from './Dashboard/FarmerDashboard/FarmerDashboard'
 import { DronePestDetection } from './Dashboard/FarmerDashboard/DronePestDetection/DronePestDetection'
 import { MarketIntelligence } from './Dashboard/FarmerDashboard/MarketIntelligence/MarketIntelligence'
 import { WeatherDashboard } from './Dashboard/FarmerDashboard/Weather/WeatherDashboard'
+import { CropInsurance } from './Dashboard/FarmerDashboard/CropInsurance/CropInsurance'
 
 /**
  * Layout wrapper — renders the shared Navbar once,
@@ -33,6 +34,7 @@ function App() {
         <Route path="/farmer/drone-pest-detection" element={<DronePestDetection />} />
         <Route path="/farmer/market-intelligence" element={<MarketIntelligence />} />
         <Route path="/farmer/weather-intelligence" element={<WeatherDashboard />} />
+        <Route path="/farmer/crop-insurance" element={<CropInsurance />} />
       </Route>
     </Routes>
   )
