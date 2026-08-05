@@ -35,7 +35,7 @@ const farmerFeatures = [
     title: 'Crop Insurance',
     desc: 'Insurance coverage details, claim tracking, and policy management.',
     icon: icons.insurance,
-    route: null,
+    route: '/farmer/crop-insurance',
   },
   {
     id: 'ai-assistant',
