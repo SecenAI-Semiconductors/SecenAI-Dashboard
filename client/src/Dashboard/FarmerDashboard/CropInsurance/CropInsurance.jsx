@@ -22,7 +22,7 @@ import {
   SkeletonForm,
   SkeletonRequests,
 } from './components/LoadingSkeleton'
-import { submitInsurance } from './services/insuranceApi'
+import { submitInsurance, updateInsurance, deleteInsurance } from './services/insuranceApi'
 import { useToast, ToastContainer } from '../../AdminDashboard/FarmerManagement/Toast'
 import farmerService from '../../../services/farmerService'
 import './CropInsurance.css'
@@ -37,6 +37,9 @@ export function CropInsurance() {
 
   // ── Detail drawer state ──
   const [viewRequest, setViewRequest] = useState(null)
+
+  // ── Edit state ──
+  const [editRequest, setEditRequest] = useState(null)
 
   // ── Submission state ──
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -66,19 +69,43 @@ export function CropInsurance() {
   async function handleSubmit(formData) {
     try {
       setIsSubmitting(true)
-      await submitInsurance(formData)
-      showToast('Insurance application submitted successfully!', 'success')
+      if (editRequest) {
+        await updateInsurance(editRequest._id, formData)
+        showToast('Insurance application updated successfully!', 'success')
+        setEditRequest(null)
+      } else {
+        await submitInsurance(formData)
+        showToast('Insurance application submitted successfully!', 'success')
+      }
       await refetch()
       return true
     } catch (err) {
       const message =
         err.response?.data?.message ||
         err.message ||
-        'Failed to submit insurance application'
+        (editRequest ? 'Failed to update insurance application' : 'Failed to submit insurance application')
       showToast(message, 'error')
       return false
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleEditClick = (req) => {
+    setEditRequest(req)
+    // Optional: scroll to form
+    document.getElementById('insurance-form-section')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const handleDelete = async (req) => {
+    if (!window.confirm('Are you sure you want to delete this insurance application?')) return
+    
+    try {
+      await deleteInsurance(req._id)
+      showToast('Insurance application deleted successfully', 'success')
+      await refetch()
+    } catch (err) {
+      showToast(err.response?.data?.message || err.message || 'Failed to delete application', 'error')
     }
   }
 
@@ -137,12 +164,16 @@ export function CropInsurance() {
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               farmers={farmers}
+              initialData={editRequest}
+              onCancelEdit={() => setEditRequest(null)}
             />
 
             {/* Section 3: My Insurance Requests */}
             <InsuranceRequestList
               requests={requests}
               onViewDetails={setViewRequest}
+              onEditRequest={handleEditClick}
+              onDeleteRequest={handleDelete}
             />
           </>
         )}

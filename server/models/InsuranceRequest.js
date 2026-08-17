@@ -85,13 +85,24 @@ const insuranceRequestSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "Pending",
-      enum: ["Pending", "Approved", "Rejected"],
+      enum: ["Pending", "Review Required", "Resubmitted", "Approved", "Rejected"],
     },
 
-    remarks: {
+    adminRemarks: {
       type: String,
-      default: "Awaiting Admin Review",
+      default: "",
     },
+
+    reviewHistory: [
+      {
+        action: String,
+        remarks: String,
+        reviewedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

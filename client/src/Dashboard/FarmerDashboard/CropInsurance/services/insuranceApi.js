@@ -34,4 +34,23 @@ export async function submitInsurance(data) {
   return insuranceService.create(data)
 }
 
+/**
+ * Update an existing insurance application.
+ * @param {string} id
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
+export async function updateInsurance(id, data) {
+  return insuranceService.update(id, data)
+}
+
+/**
+ * Delete an insurance application.
+ * @param {string} id
+ * @returns {Promise<Object>}
+ */
+export async function deleteInsurance(id) {
+  return insuranceService.delete(id)
+}
+
 export { insuranceService }

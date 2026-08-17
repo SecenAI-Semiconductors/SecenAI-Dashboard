@@ -29,13 +29,17 @@ function getStatusClass(status) {
       return 'ci-status--approved'
     case 'Rejected':
       return 'ci-status--rejected'
+    case 'Review Required':
+      return 'ci-status--review'
+    case 'Resubmitted':
+      return 'ci-status--resubmitted'
     case 'Pending':
     default:
       return 'ci-status--pending'
   }
 }
 
-export function InsuranceRequestList({ requests, onViewDetails }) {
+export function InsuranceRequestList({ requests, onViewDetails, onEditRequest, onDeleteRequest }) {
   return (
     <section className="ci-section" id="insurance-requests-section">
       <div className="ci-section-header">
@@ -107,6 +111,13 @@ export function InsuranceRequestList({ requests, onViewDetails }) {
                   </div>
                 </div>
 
+                {req.status === 'Review Required' && req.adminRemarks && (
+                  <div className="ci-request-admin-remarks" style={{ margin: '0 16px 12px', padding: '12px', background: '#fee2e2', borderRadius: '4px', borderLeft: '3px solid #b91c1c' }}>
+                    <h4 style={{ fontSize: '12px', color: '#b91c1c', marginBottom: '4px', fontWeight: 'bold' }}>Action Required - Admin Remarks</h4>
+                    <p style={{ fontSize: '13px', color: '#7f1d1d' }}>{req.adminRemarks}</p>
+                  </div>
+                )}
+
                 {/* Footer */}
                 <div className="ci-request-footer">
                   <span className="ci-request-location">
@@ -116,14 +127,39 @@ export function InsuranceRequestList({ requests, onViewDetails }) {
                     </svg>
                     {req.district}, {req.state}
                   </span>
-                  <button
-                    type="button"
-                    className="ci-view-btn"
-                    onClick={() => onViewDetails(req)}
-                    id={`ci-view-${req._id}`}
-                  >
-                    View Details →
-                  </button>
+                  
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {(req.status === 'Pending' || req.status === 'Review Required') && (
+                      <button
+                        type="button"
+                        className="ci-action-btn ci-action-btn--delete"
+                        onClick={() => onDeleteRequest(req)}
+                        style={{ padding: '6px 10px', fontSize: '12px', color: '#ef4444', background: 'transparent', border: '1px solid #fca5a5', borderRadius: '4px', cursor: 'pointer' }}
+                      >
+                        Delete
+                      </button>
+                    )}
+                    
+                    {req.status === 'Review Required' && (
+                      <button
+                        type="button"
+                        className="ci-action-btn ci-action-btn--edit"
+                        onClick={() => onEditRequest(req)}
+                        style={{ padding: '6px 10px', fontSize: '12px', color: '#7e22ce', background: '#f3e8ff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500 }}
+                      >
+                        Edit Application
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      className="ci-view-btn"
+                      onClick={() => onViewDetails(req)}
+                      id={`ci-view-${req._id}`}
+                    >
+                      View Details →
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

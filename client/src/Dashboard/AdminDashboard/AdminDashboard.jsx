@@ -24,6 +24,13 @@ const adminFeatures = [
     route: null,
   },
   {
+    id: 'crop-insurance-mgmt',
+    title: 'Crop Insurance Management',
+    desc: 'Review, approve, or request changes for farmer insurance applications.',
+    icon: icons.insurance,
+    route: '/admin/crop-insurance',
+  },
+  {
     id: 'disease-pest-analytics',
     title: 'Disease & Pest Analytics',
     desc: 'Analyze outbreak patterns, risk heat-maps, and treatment effectiveness.',
