@@ -41,10 +41,37 @@ const INITIAL_FORM = {
   requestedCoverage: '',
 }
 
-export function InsuranceForm({ onSubmit, isSubmitting, farmers = [] }) {
+export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialData = null, onCancelEdit }) {
   const [form, setForm] = useState(INITIAL_FORM)
   const [errors, setErrors] = useState({})
   const [selectedFarmerId, setSelectedFarmerId] = useState('')
+
+  // Populate form if editing
+  import('react').then(React => {
+    React.useEffect(() => {
+      if (initialData) {
+        setForm({
+          farmerName: initialData.farmerName || '',
+          cropName: initialData.cropName || '',
+          cropType: initialData.cropType || '',
+          cropSeason: initialData.cropSeason || '',
+          landArea: initialData.landArea || '',
+          soilType: initialData.soilType || '',
+          irrigationType: initialData.irrigationType || '',
+          district: initialData.district || '',
+          state: initialData.state || '',
+          sowingDate: initialData.sowingDate ? new Date(initialData.sowingDate).toISOString().split('T')[0] : '',
+          expectedHarvestDate: initialData.expectedHarvestDate ? new Date(initialData.expectedHarvestDate).toISOString().split('T')[0] : '',
+          estimatedYield: initialData.estimatedYield || '',
+          requestedCoverage: initialData.requestedCoverage || '',
+        });
+        setSelectedFarmerId(initialData.farmerId || '');
+      } else {
+        setForm(INITIAL_FORM);
+        setSelectedFarmerId('');
+      }
+    }, [initialData]);
+  });
 
   // Live premium calculation
   const estimatedPremium = useMemo(() => {
@@ -153,11 +180,15 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [] }) {
   return (
     <section className="ci-section" id="insurance-form-section">
       <div className="ci-section-header">
-        <span className="ci-section-icon">📝</span>
-        <h2 className="ci-section-title">Apply for Crop Insurance</h2>
+        <span className="ci-section-icon">{initialData ? '✏️' : '📝'}</span>
+        <h2 className="ci-section-title">
+          {initialData ? 'Edit Insurance Application' : 'Apply for Crop Insurance'}
+        </h2>
       </div>
       <p className="ci-section-subtitle">
-        Fill in the details below to submit an insurance application for your crop.
+        {initialData 
+          ? 'Update the details below to resubmit your insurance application.' 
+          : 'Fill in the details below to submit an insurance application for your crop.'}
       </p>
 
       <div className="ci-form-layout">
@@ -400,7 +431,19 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [] }) {
           </div>
 
           {/* Submit Button */}
-          <div className="ci-form-group ci-form-group--full ci-form-actions">
+          <div className="ci-form-group ci-form-group--full ci-form-actions" style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            {initialData && onCancelEdit && (
+              <button
+                type="button"
+                className="ci-submit-btn"
+                style={{ background: '#fff', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }}
+                onClick={onCancelEdit}
+                disabled={isSubmitting}
+              >
+                Cancel Edit
+              </button>
+            )}
+            
             <button
               type="submit"
               className="ci-submit-btn"
@@ -410,7 +453,7 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [] }) {
               {isSubmitting ? (
                 <>
                   <span className="ci-spinner" />
-                  Submitting…
+                  {initialData ? 'Updating…' : 'Submitting…'}
                 </>
               ) : (
                 <>
@@ -418,7 +461,7 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [] }) {
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
                     <path d="m9 12 2 2 4-4" />
                   </svg>
-                  Submit Insurance Request
+                  {initialData ? 'Update Insurance Request' : 'Submit Insurance Request'}
                 </>
               )}
             </button>
