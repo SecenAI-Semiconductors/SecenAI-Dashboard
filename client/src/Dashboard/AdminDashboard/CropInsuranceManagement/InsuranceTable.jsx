@@ -69,7 +69,7 @@ export function InsuranceTable({ applications, onView, onReview }) {
                     View
                   </button>
                   {(app.status === 'Pending' || app.status === 'Resubmitted') && (
-                    <button className="cim-action-btn review" onClick={() => onReview(app, 'approve')}>
+                    <button className="cim-action-btn review" onClick={() => onReview(app, 'review')}>
                       Review
                     </button>
                   )}
