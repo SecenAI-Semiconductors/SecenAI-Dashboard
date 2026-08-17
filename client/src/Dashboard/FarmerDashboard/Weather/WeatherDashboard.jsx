@@ -15,7 +15,7 @@ import { LoadingSkeleton } from './components/LoadingSkeleton'
 import './WeatherDashboard.css'
 
 export function WeatherDashboard() {
-  const { searchTerm, setSearchTerm, weatherData, loading, error, search, hasData } = useWeather()
+  const { searchTerm, setSearchTerm, weatherData, loading, error, search, hasData, aiData, aiLoading, aiError } = useWeather()
   const [chartMode, setChartMode] = useState('hourly')
 
   useEffect(() => {
@@ -54,14 +54,14 @@ export function WeatherDashboard() {
         <HourlyForecast hourly={weatherData.hourly} />
         <WeeklyForecast daily={weatherData.daily} />
         <WeatherAnalysis summary={weatherData.summary} />
-        <AgricultureAnalysis indicators={weatherData.agriculture} />
-        <WeatherRisks risks={weatherData.risks} />
-        <AIRecommendation />
-        <FarmingRecommendations recommendations={weatherData.recommendations} />
+        <AgricultureAnalysis indicators={weatherData.agriculture} aiData={aiData} aiLoading={aiLoading} aiError={aiError} />
+        <WeatherRisks risks={weatherData.risks} aiData={aiData} aiLoading={aiLoading} aiError={aiError} />
+        <AIRecommendation aiData={aiData} aiLoading={aiLoading} aiError={aiError} />
+        <FarmingRecommendations recommendations={weatherData.recommendations} aiData={aiData} aiLoading={aiLoading} aiError={aiError} />
         <WeatherCharts hourly={weatherData.hourly} daily={weatherData.daily} chartMode={chartMode} setChartMode={setChartMode} />
       </>
     )
-  }, [chartMode, error, loading, search, searchTerm, weatherData])
+  }, [chartMode, error, loading, search, searchTerm, weatherData, aiData, aiLoading, aiError])
 
   return (
     <div className="dashboard-view weather-view">
