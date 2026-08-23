@@ -741,3 +741,110 @@
     justify-items: start;
   }
 }
+
+/* ── AI Intelligence Styles ── */
+
+.ai-unavailable-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 14px;
+}
+
+.ai-section-banner {
+  margin-bottom: 14px;
+}
+
+.ai-unavailable-banner p {
+  color: #92400e;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ai-unavailable-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ai-shimmer-block {
+  height: 22px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(229, 243, 234, 0.8) 0%,
+    rgba(250, 250, 250, 0.98) 50%,
+    rgba(229, 243, 234, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+.ai-shimmer-short {
+  width: 60%;
+}
+
+.ai-shimmer-medium {
+  width: 80%;
+}
+
+.ai-shimmer-inline {
+  height: 16px;
+  border-radius: 6px;
+  margin-top: 8px;
+  width: 90%;
+  background: linear-gradient(
+    90deg,
+    rgba(229, 243, 234, 0.8) 0%,
+    rgba(250, 250, 250, 0.98) 50%,
+    rgba(229, 243, 234, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+.ai-shimmer-on-dark {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+.risk-explanation {
+  font-size: 13px;
+  opacity: 0.9;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ai-rec-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+
+.ai-rec-list li {
+  line-height: 1.7;
+}
+
+.ai-warnings {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.ai-warning-item {
+  color: #b45309;
+  font-weight: 600;
+  line-height: 1.6;
+}
+

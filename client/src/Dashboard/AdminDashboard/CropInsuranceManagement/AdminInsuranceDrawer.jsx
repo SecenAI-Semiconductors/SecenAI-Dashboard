@@ -134,9 +134,10 @@ export function AdminInsuranceDrawer({ isOpen, onClose, application, onAction })
 
         {showActions && (
           <div className="cim-drawer-footer">
-            <button className="cim-btn cim-btn-reject" onClick={() => onAction(application, 'reject')}>Reject</button>
-            <button className="cim-btn cim-btn-review" onClick={() => onAction(application, 'review')}>Request Changes</button>
-            <div style={{flex: 1}}></div>
+            <div className="cim-drawer-footer-left">
+              <button className="cim-btn cim-btn-reject" onClick={() => onAction(application, 'reject')}>Reject</button>
+              <button className="cim-btn cim-btn-review" onClick={() => onAction(application, 'review')}>Request Changes</button>
+            </div>
             <button className="cim-btn cim-btn-approve" onClick={() => onAction(application, 'approve')}>Approve Application</button>
           </div>
         )}
