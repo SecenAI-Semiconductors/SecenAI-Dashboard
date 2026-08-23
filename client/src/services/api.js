@@ -5,7 +5,7 @@ import axios from 'axios'
  * All API calls in the app should use this instance.
  */
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, ''),
   headers: {
     'Content-Type': 'application/json',
     'X-API-Key': import.meta.env.VITE_API_SECRET_KEY || '',
