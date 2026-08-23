@@ -475,7 +475,7 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialDat
             <div className="ci-premium-header">
               <div className="ci-premium-icon-wrap">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  <path d="M6 3h12M6 8h12M14 21l-8-8h5a5 5 0 0 0 0-10" />
                 </svg>
               </div>
               <div>

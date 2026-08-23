@@ -377,7 +377,11 @@ function buildRecommendations(current, summary) {
 
 export async function searchWeather(location) {
   const place = await getLocationCoordinates(location)
-  const rawWeather = await getWeatherForCoordinates(place.lat, place.lon)
+  return getWeatherDataForCoordinates(place.lat, place.lon, place.name)
+}
+
+export async function getWeatherDataForCoordinates(lat, lon, locationName = 'Current location') {
+  const rawWeather = await getWeatherForCoordinates(lat, lon)
   const forecastEntries = normalizeForecastEntries(rawWeather.forecast)
   const current = normalizeCurrentWeather(rawWeather.current)
   const hourly = buildHourlyData(forecastEntries)
@@ -388,8 +392,8 @@ export async function searchWeather(location) {
   const recommendations = buildRecommendations(current, summary)
 
   return {
-    locationName: place.name,
-    coords: { lat: place.lat, lon: place.lon },
+    locationName,
+    coords: { lat, lon },
     current: {
       ...current,
       lastUpdated: current.lastUpdated,
