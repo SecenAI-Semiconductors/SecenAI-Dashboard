@@ -23,7 +23,11 @@ export function CropInsuranceManagement() {
     setIsLoading(true);
     try {
       const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-      const res = await fetch(`${baseUrl}/api/insurance`);
+      const res = await fetch(`${baseUrl}/api/insurance`, {
+        headers: {
+          'x-api-key': import.meta.env.VITE_API_SECRET_KEY || ''
+        }
+      });
       if (!res.ok) throw new Error('Failed to fetch insurance applications');
       const data = await res.json();
       setApplications(data);
@@ -93,7 +97,10 @@ export function CropInsuranceManagement() {
       const url = `${baseUrl}/api/insurance/${selectedApp._id}/${type}`;
       const res = await fetch(url, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': import.meta.env.VITE_API_SECRET_KEY || ''
+        },
         body: JSON.stringify({ adminRemarks: remarks })
       });
 
