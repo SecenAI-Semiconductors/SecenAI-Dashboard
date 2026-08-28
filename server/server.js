@@ -68,6 +68,7 @@ app.get("/health", (req, res) => {
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/insurance", require("./routes/insuranceRoutes"));
 app.use("/api/weather", require("./routes/weatherRoutes"));
+app.use("/api/soil", require("./routes/soilRoutes"));
 
 // Global error-handling middleware
 app.use((err, req, res, next) => {

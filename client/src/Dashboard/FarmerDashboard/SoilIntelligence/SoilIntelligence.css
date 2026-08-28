@@ -1,0 +1,852 @@
+/* ═══════════════════════════════════════════════════════════════
+   SOIL INTELLIGENCE PAGE — Premium CSS
+   Follows project design language (variables, green accent palette)
+   Prefix: si-
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ──── Page Container ──── */
+.si-page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.si-content {
+  flex: 1;
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ──── Glass Cards ──── */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* ──── Page Header ──── */
+.si-page-header {
+  margin-bottom: 24px;
+  padding: 24px 26px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent-farmer-soft) 0%, rgba(255, 255, 255, 0.96) 100%);
+  box-shadow: 0 14px 34px rgba(34, 120, 60, 0.06);
+}
+
+.si-page-title-row {
+  margin-bottom: 8px;
+}
+
+.si-page-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border-subtle);
+  color: var(--accent-green);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.si-page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.si-page-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 680px;
+}
+
+/* ──── Field Selector ──── */
+.si-field-selector-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  padding: 16px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 32px;
+}
+
+.si-field-selector-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.si-field-details {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.si-detail-item {
+  margin-right: 16px;
+}
+
+.si-select-input {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: white;
+  min-width: 250px;
+  cursor: pointer;
+}
+
+.si-select-input:focus {
+  outline: none;
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px var(--accent-green-soft);
+}
+
+/* ──── Section Headers ──── */
+.si-section {
+  margin-bottom: 32px;
+}
+
+.si-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.si-section-icon {
+  font-size: 20px;
+}
+
+.si-section-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ──── Dashboard Grid ──── */
+.si-dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.si-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.si-stacked-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.si-recs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.si-recs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ──── Overview Component ──── */
+.si-overview-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.si-score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.si-overview-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.si-score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border: 6px solid #e5e7eb;
+}
+
+.si-score-good { border-color: #10b981; color: #10b981; }
+.si-score-moderate { border-color: #f59e0b; color: #f59e0b; }
+.si-score-poor { border-color: #ef4444; color: #ef4444; }
+
+.si-score-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.si-score-max {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 12px;
+  margin-left: 4px;
+}
+
+.si-condition-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.si-condition-badge.si-score-good { background: #d1fae5; }
+.si-condition-badge.si-score-moderate { background: #fef3c7; }
+.si-condition-badge.si-score-poor { background: #fee2e2; }
+
+.si-overview-details {
+  display: flex;
+  gap: 48px;
+}
+
+.si-detail-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.si-detail-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.si-detail-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ──── Parameters Grid ──── */
+.si-params-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.si-param-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.si-param-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.si-param-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.si-param-header h4 {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.si-param-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.si-param-good { background: #d1fae5; color: #065f46; }
+.si-param-moderate { background: #fef3c7; color: #92400e; }
+.si-param-poor { background: #fee2e2; color: #991b1b; }
+
+.si-param-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.si-param-unit {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.si-param-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ──── NPK Analysis ──── */
+.si-npk-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.si-npk-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.si-npk-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.si-npk-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.si-npk-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.si-npk-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.si-npk-badge.si-bar-optimal { background: #d1fae5; color: #065f46; }
+.si-npk-badge.si-bar-low { background: #fee2e2; color: #991b1b; }
+.si-npk-badge.si-bar-high { background: #fef3c7; color: #92400e; }
+
+.si-npk-track {
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.si-npk-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s ease-in-out;
+}
+
+.si-npk-fill.si-bar-optimal { background: #10b981; }
+.si-npk-fill.si-bar-low { background: #ef4444; }
+.si-npk-fill.si-bar-high { background: #f59e0b; }
+
+.si-npk-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ──── Soil Moisture ──── */
+.si-moisture-content {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.si-moisture-visual {
+  flex-shrink: 0;
+}
+
+.si-moisture-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.si-moisture-wave {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: #3b82f6;
+  opacity: 0.6;
+  left: -50%;
+  border-radius: 40%;
+  animation: wave 4s infinite linear;
+  transition: top 1s ease;
+}
+
+@keyframes wave {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.si-moisture-wave.si-moisture-good { background: #3b82f6; }
+.si-moisture-wave.si-moisture-moderate { background: #f59e0b; }
+.si-moisture-wave.si-moisture-poor { background: #ef4444; }
+
+.si-moisture-value {
+  position: relative;
+  z-index: 10;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 20px;
+}
+
+.si-moisture-status {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.si-moisture-status.si-moisture-good { color: #2563eb; }
+.si-moisture-status.si-moisture-moderate { color: #d97706; }
+.si-moisture-status.si-moisture-poor { color: #dc2626; }
+
+.si-moisture-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ──── Soil Health Analysis ──── */
+.si-health-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.si-health-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.si-health-score-text {
+  font-weight: 600;
+  color: var(--accent-green);
+}
+
+.si-health-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.si-health-list h4 {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.si-health-list ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.si-health-list li {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.si-check { color: #10b981; font-weight: bold; }
+.si-warn { color: #f59e0b; font-weight: bold; }
+
+/* ──── Recommendations ──── */
+.si-recs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.si-rec-item {
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.si-rec-header h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.si-rec-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.si-rec-action-box {
+  background: #f8faf8;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent-green);
+}
+
+.si-rec-action-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-green);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.si-rec-action-box p {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.si-section-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.si-fert-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.si-fert-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: var(--radius-sm);
+}
+
+.si-fert-nutrient {
+  font-weight: 500;
+}
+
+.si-fert-action {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.si-advisory-note {
+  display: flex;
+  gap: 8px;
+  background: #eff6ff;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  color: #1e3a8a;
+  font-size: 12px;
+}
+
+.si-irrig-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.si-irrig-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.si-irrig-factors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+}
+
+.si-irrig-factor {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.si-factor-value {
+  font-weight: 600;
+}
+
+.si-factor-muted {
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.si-irrig-note {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ──── Soil Alerts ──── */
+.si-alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.si-alert-card {
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.si-alert-critical { background: #fef2f2; border-color: #ef4444; }
+.si-alert-warning { background: #fffbeb; border-color: #f59e0b; }
+.si-alert-info { background: #eff6ff; border-color: #3b82f6; }
+
+.si-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.si-alert-header h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.si-alert-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-left: 28px;
+}
+
+/* ──── AI Recommendation ──── */
+.si-ai-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.si-ai-card-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.si-ai-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--text-secondary);
+}
+
+.si-ai-summary,
+.si-ai-irrigation {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+/* ──── Trends ──── */
+.si-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.si-chart-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.si-chart-wrapper {
+  width: 100%;
+}
+
+.si-trends-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.si-empty-icon {
+  font-size: 32px;
+}
+
+/* ──── Empty / Error / Skeleton ──── */
+.si-empty-state-card {
+  padding: 64px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.si-empty-state-card h3 {
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.si-empty-state-card p {
+  color: var(--text-secondary);
+}
+
+.si-error-card {
+  margin-bottom: 24px;
+}
+
+.si-empty-state {
+  padding: 32px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.si-error-icon {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.si-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #991b1b;
+  margin-bottom: 8px;
+}
+
+.si-retry-btn {
+  background: white;
+  border: 1px solid #fca5a5;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  color: #991b1b;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.si-skeleton-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.si-skeleton-hero { height: 160px; }
+.si-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.si-skeleton-card {
+  height: 140px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  animation: pulse 1.5s infinite;
+}
+.si-skeleton-wide {
+  height: 250px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+
+/* ──── Responsive Design ──── */
+@media (max-width: 900px) {
+  .si-two-col,
+  .si-recs-grid,
+  .si-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .si-overview-main {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .si-overview-details {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .si-field-selector-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .si-field-dropdown,
+  .si-select-input {
+    width: 100%;
+  }
+}
