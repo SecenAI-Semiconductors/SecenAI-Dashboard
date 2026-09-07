@@ -7,7 +7,7 @@ const farmerFeatures = [
     title: 'Soil Intelligence',
     desc: 'Real-time soil health metrics including pH, moisture, and nutrient levels.',
     icon: icons.soil,
-    route: null,
+    route: '/farmer/soil-intelligence',
   },
   {
     id: 'weather-irrigation',

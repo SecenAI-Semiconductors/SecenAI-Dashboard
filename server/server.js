@@ -12,6 +12,7 @@ const app = express();
 /* ── Allowed frontend origins ── */
 const allowedOrigins = [
   process.env.CLIENT_URL,       // Production frontend URL (set in Vercel env vars)
+  "https://secen-ai-dashboard.vercel.app", // Fallback for production URL
   "http://localhost:5173",       // Local Vite dev server
   "http://localhost:3000",       // Alternate local dev port
 ].filter(Boolean);               // Remove undefined values
@@ -67,6 +68,7 @@ app.get("/health", (req, res) => {
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/insurance", require("./routes/insuranceRoutes"));
 app.use("/api/weather", require("./routes/weatherRoutes"));
+app.use("/api/soil", require("./routes/soilRoutes"));
 
 // Global error-handling middleware
 app.use((err, req, res, next) => {

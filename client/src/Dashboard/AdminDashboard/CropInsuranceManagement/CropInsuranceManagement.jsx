@@ -22,11 +22,16 @@ export function CropInsuranceManagement() {
   const fetchApplications = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/insurance`);
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/api/insurance`, {
+        headers: {
+          'x-api-key': import.meta.env.VITE_API_SECRET_KEY || ''
+        }
+      });
       if (!res.ok) throw new Error('Failed to fetch insurance applications');
       const data = await res.json();
       setApplications(data);
-    } catch (err) {
+    } catch (err) { 
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -88,10 +93,14 @@ export function CropInsuranceManagement() {
     if (!selectedApp) return;
     
     try {
-      const url = `${import.meta.env.VITE_API_BASE_URL}/api/insurance/${selectedApp._id}/${type}`;
+      const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+      const url = `${baseUrl}/api/insurance/${selectedApp._id}/${type}`;
       const res = await fetch(url, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': import.meta.env.VITE_API_SECRET_KEY || ''
+        },
         body: JSON.stringify({ adminRemarks: remarks })
       });
 
