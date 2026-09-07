@@ -12,36 +12,47 @@ const app = express();
 /* ── Allowed frontend origins ── */
 const allowedOrigins = [
   process.env.CLIENT_URL,       // Production frontend URL (set in Vercel env vars)
-  "https://secen-ai-dashboard.vercel.app", // Fallback for production URL
   "http://localhost:5173",       // Local Vite dev server
   "http://localhost:3000",       // Alternate local dev port
 ].filter(Boolean);               // Remove undefined values
 
-/* ── Strict CORS configuration ── */
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow requests with no origin (e.g. mobile apps, server-to-server)
-      // only in development. In production, block them.
-      if (!origin) {
-        if (process.env.NODE_ENV === "production") {
-          return callback(new Error("CORS: No origin header — request blocked"));
-        }
-        return callback(null, true);
-      }
+// Regex to match Vercel preview deployment URLs for this project
+const vercelPreviewRegex = /^https:\/\/secen-ai-dashboard[a-z0-9-]*\.vercel\.app$/;
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+/* ── CORS configuration ── */
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow requests with no origin (e.g. mobile apps, server-to-server)
+    // only in development. In production, block them.
+    if (!origin) {
+      if (process.env.NODE_ENV === "production") {
+        return callback(new Error("CORS: No origin header — request blocked"));
       }
+      return callback(null, true);
+    }
 
-      return callback(new Error(`CORS: Origin ${origin} not allowed`));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-API-Key"],
-    optionsSuccessStatus: 200,
-  })
-);
+    // Check static allowlist
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Check Vercel preview deployment URLs
+    if (vercelPreviewRegex.test(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS: Origin ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-API-Key"],
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
+
+// Explicitly handle preflight OPTIONS requests for all routes
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
