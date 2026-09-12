@@ -1,0 +1,699 @@
+/* ================================================================
+   DRONE OPERATIONS MODULE — DroneOperations.css
+   Uses existing CSS variables from index.css / App.css
+   Class prefix: dom-
+   ================================================================ */
+
+/* ===== Page Header ===== */
+.dom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dom-header-left h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.4px;
+  margin-bottom: 4px;
+}
+
+.dom-header-left p {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ===== Tab Navigation ===== */
+.dom-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 28px;
+}
+
+.dom-tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.dom-tab:hover {
+  color: var(--text-primary);
+}
+
+.dom-tab.active {
+  color: var(--accent-green);
+  border-bottom-color: var(--accent-green);
+  font-weight: 600;
+}
+
+/* ===== Metrics Grid ===== */
+.dom-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dom-metric-card {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.dom-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.dom-metric-title {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dom-metric-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dom-metric-card.available  .dom-metric-value { color: #10b981; }
+.dom-metric-card.scheduled  .dom-metric-value { color: #3b82f6; }
+.dom-metric-card.flying     .dom-metric-value { color: var(--accent-green); }
+.dom-metric-card.charging   .dom-metric-value { color: #f59e0b; }
+.dom-metric-card.offline    .dom-metric-value { color: #ef4444; }
+
+/* ===== Filters Section ===== */
+.dom-filters-section {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dom-search-bar {
+  flex: 1;
+  min-width: 250px;
+  position: relative;
+}
+
+.dom-search-bar svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.dom-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 40px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+}
+
+.dom-search-input:focus {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(34, 120, 60, 0.1);
+}
+
+.dom-filter-select {
+  padding: 10px 36px 10px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>') no-repeat right 12px center;
+  appearance: none;
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+  font-family: inherit;
+}
+
+/* ===== Table ===== */
+.dom-table-container {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.dom-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.dom-table th {
+  padding: 13px 16px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.dom-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14px;
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.dom-table tr:last-child td {
+  border-bottom: none;
+}
+
+.dom-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+.dom-table tr.clickable {
+  cursor: pointer;
+}
+
+/* ===== Status Badges ===== */
+.dom-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dom-badge.available   { background: #d1fae5; color: #059669; }
+.dom-badge.flying      { background: #dcfce7; color: var(--accent-green); }
+.dom-badge.scheduled   { background: #dbeafe; color: #1d4ed8; }
+.dom-badge.charging    { background: #fef3c7; color: #b45309; }
+.dom-badge.maintenance { background: #f3e8ff; color: #7e22ce; }
+.dom-badge.offline     { background: #fee2e2; color: #b91c1c; }
+.dom-badge.completed   { background: #d1fae5; color: #059669; }
+.dom-badge.aborted     { background: #fee2e2; color: #b91c1c; }
+.dom-badge.in-progress { background: #dcfce7; color: var(--accent-green); }
+
+/* ===== Battery Bar ===== */
+.dom-battery {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 80px;
+}
+
+.dom-battery-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border-subtle);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dom-battery-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.dom-battery-fill.high   { background: #10b981; }
+.dom-battery-fill.medium { background: #f59e0b; }
+.dom-battery-fill.low    { background: #ef4444; }
+
+.dom-battery-pct {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  width: 30px;
+  text-align: right;
+}
+
+/* ===== Flight Scheduling Form ===== */
+.dom-schedule-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.dom-form-card {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.dom-form-card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.dom-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.dom-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dom-form-field.full {
+  grid-column: 1 / -1;
+}
+
+.dom-form-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dom-form-select,
+.dom-form-input {
+  padding: 10px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.dom-form-select {
+  padding-right: 36px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  appearance: none;
+  cursor: pointer;
+}
+
+.dom-form-select:focus,
+.dom-form-input:focus {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(34, 120, 60, 0.1);
+}
+
+.dom-form-select:disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.dom-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* ===== Scheduled Flights List ===== */
+.dom-upcoming-card {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 24px;
+}
+
+.dom-upcoming-card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.dom-flight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dom-flight-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.dom-flight-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--accent-green-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dom-flight-icon svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-green);
+}
+
+.dom-flight-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dom-flight-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dom-flight-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.dom-flight-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.dom-empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ===== Buttons ===== */
+.dom-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dom-btn-primary {
+  background: var(--accent-green);
+  color: #fff;
+}
+.dom-btn-primary:hover { background: var(--accent-green-light); }
+.dom-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.dom-btn-outline {
+  background: #fff;
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+.dom-btn-outline:hover { background: var(--bg-secondary); }
+
+/* ===== Pre-flight Check ===== */
+.dom-preflight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.dom-preflight-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.dom-preflight-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.dom-preflight-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dom-preflight-icon.pass { background: #d1fae5; }
+.dom-preflight-icon.warn { background: #fef3c7; }
+.dom-preflight-icon.fail { background: #fee2e2; }
+
+.dom-preflight-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.dom-preflight-icon.pass svg { color: #059669; }
+.dom-preflight-icon.warn svg { color: #b45309; }
+.dom-preflight-icon.fail svg { color: #b91c1c; }
+
+.dom-preflight-detail {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ===== Drawer ===== */
+.dom-drawer-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  opacity: 0;
+  animation: domFadeIn 0.2s forwards;
+}
+
+.dom-drawer {
+  width: 500px;
+  max-width: 100%;
+  background: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  animation: domSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dom-drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dom-drawer-header h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dom-drawer-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+}
+.dom-drawer-close:hover { background: var(--bg-secondary); color: var(--text-primary); }
+
+.dom-drawer-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.dom-drawer-section {
+  margin-bottom: 24px;
+}
+
+.dom-drawer-section h3 {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dom-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.dom-detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dom-detail-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dom-detail-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ===== Alert items in drawer ===== */
+.dom-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dom-alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dom-alert-item.error   { background: #fef2f2; color: #991b1b; border-left: 3px solid #ef4444; }
+.dom-alert-item.warning { background: #fffbeb; color: #92400e; border-left: 3px solid #f59e0b; }
+.dom-alert-item.info    { background: #eff6ff; color: #1e40af; border-left: 3px solid #3b82f6; }
+
+.dom-no-alerts {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+}
+
+/* ===== Modal ===== */
+.dom-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: domFadeIn 0.2s forwards;
+}
+
+.dom-modal {
+  background: #fff;
+  border-radius: var(--radius-md);
+  width: 460px;
+  max-width: 92%;
+  padding: 28px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
+  animation: domSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dom-modal h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.dom-modal-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.dom-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* ===== Animations ===== */
+@keyframes domFadeIn  { from { opacity: 0; }             to { opacity: 1; } }
+@keyframes domSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes domSlideUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .dom-schedule-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dom-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dom-metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dom-tabs {
+    overflow-x: auto;
+  }
+
+  .dom-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
