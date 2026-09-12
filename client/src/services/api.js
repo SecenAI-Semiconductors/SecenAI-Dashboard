@@ -10,7 +10,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'X-API-Key': import.meta.env.VITE_API_SECRET_KEY || '',
   },
-  timeout: 15000,
+  timeout: 30000,
 })
 
 export default api
