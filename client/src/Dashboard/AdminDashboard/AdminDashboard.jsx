@@ -14,7 +14,7 @@ const adminFeatures = [
     title: 'Drone Operations',
     desc: 'Schedule flights, monitor drone fleets, and review mission logs.',
     icon: icons.droneOps,
-    route: null,
+    route: '/admin/drone-operations',
   },
   {
     id: 'crop-yield-analytics',

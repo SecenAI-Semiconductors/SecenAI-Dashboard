@@ -15,7 +15,7 @@ const util = require("util");
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 // ── Request timeout (ms) ──
-const REQUEST_TIMEOUT_MS = 10000;
+const REQUEST_TIMEOUT_MS = 25000;
 
 // ── Safety system instruction ──
 const SYSTEM_INSTRUCTION = `You are an agricultural weather intelligence analyst. Your role is to interpret weather data for farming decisions.
@@ -362,9 +362,6 @@ async function generateWeatherIntelligence(weatherData) {
       config: {
         responseMimeType: "application/json",
         responseSchema: RESPONSE_SCHEMA,
-        thinkingConfig: {
-          thinkingLevel: "medium",
-        },
       },
       requestOptions: {
         signal: controller.signal,

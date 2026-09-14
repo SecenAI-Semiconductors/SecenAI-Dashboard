@@ -19,9 +19,9 @@ const connectDB = async () => {
   } catch (error) {
     console.error("MongoDB Connection Error:");
     console.error(error);
-
-    process.exit(1);
+    // Don't call process.exit() in serverless — it kills the function
+    // and prevents any response (including CORS headers) from being sent.
   }
 };
 
-module.exports = connectDB;
+module.exports = connectDB;
