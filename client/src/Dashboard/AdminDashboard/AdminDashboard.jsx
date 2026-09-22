@@ -35,7 +35,7 @@ const adminFeatures = [
     title: 'Disease & Pest Analytics',
     desc: 'Analyze outbreak patterns, risk heat-maps, and treatment effectiveness.',
     icon: icons.disease,
-    route: null,
+    route: '/admin/disease-analytics',
   },
 ]
 

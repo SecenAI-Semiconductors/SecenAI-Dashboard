@@ -86,6 +86,9 @@ app.use("/api/soil", require("./routes/soilRoutes"));
 // ── Drone Operations (single consolidated router) ────────────────────────────
 app.use("/api", require("./routes/droneOperationRoutes"));
 
+// ── Disease & Pest Analytics (admin read-only aggregation) ───────────────────
+app.use("/api/admin/disease-analytics", require("./routes/adminDiseaseAnalyticsRoutes"));
+
 // Global error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
