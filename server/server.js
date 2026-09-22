@@ -23,12 +23,9 @@ const vercelPreviewRegex = /^https:\/\/secen-ai-dashboard[a-z0-9-]*\.vercel\.app
 /* ── CORS configuration ── */
 const corsOptions = {
   origin(origin, callback) {
-    // Allow requests with no origin (e.g. mobile apps, server-to-server)
-    // only in development. In production, block them.
+    // Allow requests with no origin (health checks, server-to-server, curl/Postman).
+    // Browser cross-origin requests will always have an origin header, so this is safe.
     if (!origin) {
-      if (process.env.NODE_ENV === "production") {
-        return callback(new Error("CORS: No origin header — request blocked"));
-      }
       return callback(null, true);
     }
 
