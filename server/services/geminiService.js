@@ -12,12 +12,29 @@ const { GoogleGenAI } = require("@google/genai");
 const util = require("util");
 
 // ── Centralized model constant ──
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+// Fallback chain: try cheapest/lightest first, fall back to heavier models.
+// Each model has its own free tier quota, so spreading across models = more free requests.
+const GEMINI_MODELS = (process.env.GEMINI_MODEL || "gemini-3.5-flash-lite")
+  .split(",")
+  .map((m) => m.trim());
+
+// Default fallback chain if only one model is configured
+const MODEL_FALLBACK_CHAIN = GEMINI_MODELS.length > 1
+  ? GEMINI_MODELS
+  : [
+      "gemini-3.5-flash-lite",   // Cheapest, highest free tier limits
+      "gemini-3.1-flash-lite",   // Fallback lite model
+      "gemini-3.5-flash",        // Full model, lower free tier limits (20/day)
+    ];
+
+// Export the primary model for logging
+const GEMINI_MODEL = MODEL_FALLBACK_CHAIN[0];
 
 // ── Request timeout (ms) ──
 // Keep under Vercel's serverless function limit (10s on Hobby, 30s+ on Pro).
 // Leave ~1s headroom for Express overhead.
-const REQUEST_TIMEOUT_MS = parseInt(process.env.GEMINI_TIMEOUT_MS, 10) || 9000;
+const REQUEST_TIMEOUT_MS = parseInt(process.env.GEMINI_TIMEOUT_MS, 10) || 15000;
+
 
 // ── Safety system instruction ──
 const SYSTEM_INSTRUCTION = `You are an agricultural weather intelligence analyst. Your role is to interpret weather data for farming decisions.
@@ -343,7 +360,14 @@ Provide your analysis as the required JSON structure.`;
 /**
  * Call Gemini to generate weather intelligence.
  * Returns parsed JSON on success, throws on failure/timeout.
+ *
+ * Strategy: iterate through MODEL_FALLBACK_CHAIN. For each model, retry up
+ * to MAX_RETRIES times on 503/429. If all retries for a model fail with
+ * 503/429, move to the next model. This spreads load across free-tier quotas.
  */
+const MAX_RETRIES = 2;
+const RETRY_BASE_DELAY_MS = 1000;
+
 async function generateWeatherIntelligence(weatherData) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -351,50 +375,83 @@ async function generateWeatherIntelligence(weatherData) {
   }
 
   const ai = new GoogleGenAI({ apiKey });
+  const prompt = buildPrompt(weatherData);
+  let lastError;
 
-  // Set up abort controller for timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  for (const model of MODEL_FALLBACK_CHAIN) {
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  try {
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: buildPrompt(weatherData),
-      systemInstruction: SYSTEM_INSTRUCTION,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
-      },
-      requestOptions: {
-        signal: controller.signal,
-      },
-    });
+      try {
+        console.log(`[Gemini] Trying ${model} (attempt ${attempt})...`);
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          systemInstruction: SYSTEM_INSTRUCTION,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: RESPONSE_SCHEMA,
+          },
+          requestOptions: {
+            signal: controller.signal,
+          },
+        });
 
-    clearTimeout(timeoutId);
+        clearTimeout(timeoutId);
 
-    const text = response.text;
-    if (!text) {
-      throw new Error("Empty response from Gemini");
+        const text = response.text;
+        if (!text) {
+          throw new Error("Empty response from Gemini");
+        }
+
+        const parsed = JSON.parse(text);
+        console.log(`[Gemini] Success with ${model}`);
+        return parsed;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        lastError = err;
+
+        if (err.name === "AbortError") {
+          throw new Error("Gemini request timed out");
+        }
+
+        const status = err.status || err.httpCode;
+
+        // 503 = overloaded, 429 = rate limited — try next attempt or model
+        if (status === 503 || status === 429) {
+          if (attempt < MAX_RETRIES) {
+            const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1);
+            console.log(
+              `[Gemini] ${model} attempt ${attempt} failed (${status}), retrying in ${delay}ms...`
+            );
+            await new Promise((r) => setTimeout(r, delay));
+            continue;
+          }
+          // All retries exhausted for this model — try next model
+          console.log(
+            `[Gemini] ${model} exhausted (${status}), trying next model...`
+          );
+          break;
+        }
+
+        // Non-retryable error (400, 404, etc.) — log and throw immediately
+        logGeminiError(err, "generateWeatherIntelligence");
+        throw err;
+      }
     }
-
-    // Parse the JSON response
-    const parsed = JSON.parse(text);
-    return parsed;
-  } catch (err) {
-    clearTimeout(timeoutId);
-
-    if (err.name === "AbortError") {
-      throw new Error("Gemini request timed out");
-    }
-
-    logGeminiError(err, "generateWeatherIntelligence");
-
-    throw err;
   }
+
+  // All models in the fallback chain failed
+  console.error("[Gemini] All models in fallback chain failed");
+  logGeminiError(lastError, "generateWeatherIntelligence (all models failed)");
+  throw lastError;
 }
 
 module.exports = {
   generateWeatherIntelligence,
   GEMINI_MODEL,
+  MODEL_FALLBACK_CHAIN,
   REQUEST_TIMEOUT_MS,
 };
+

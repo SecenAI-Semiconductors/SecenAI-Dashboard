@@ -1,3 +1,5 @@
+/* Deploy stamp: forces Vercel to rebuild the serverless function */
+const DEPLOY_STAMP = "2026-09-22T23:30Z";
 require("dotenv").config();
 
 const express = require("express");
@@ -75,6 +77,24 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+// Temporary debug endpoint — remove after diagnosing Vercel 500s
+app.get("/debug", (req, res) => {
+  res.status(200).json({
+    deployStamp: DEPLOY_STAMP,
+    nodeVersion: process.version,
+    expressVersion: require("express/package.json").version,
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      MONGO_URI_SET: Boolean(process.env.MONGO_URI),
+      GEMINI_API_KEY_SET: Boolean(process.env.GEMINI_API_KEY),
+      GEMINI_MODEL: process.env.GEMINI_MODEL || "(default)",
+      API_SECRET_KEY_SET: Boolean(process.env.API_SECRET_KEY),
+      CLIENT_URL: process.env.CLIENT_URL,
+      VERCEL: process.env.VERCEL,
+    },
+  });
+});
+
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/insurance", require("./routes/insuranceRoutes"));
 app.use("/api/weather", require("./routes/weatherRoutes"));
@@ -90,10 +110,10 @@ app.use("/api/admin/disease-analytics", require("./routes/adminDiseaseAnalyticsR
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
-    message:
-      process.env.NODE_ENV === "production"
-        ? "Internal server error"
-        : err.message,
+    message: err.message,
+    // Temporarily expose stack in production to diagnose Vercel 500s
+    // TODO: revert to "Internal server error" after fix
+    stack: process.env.NODE_ENV === "production" ? err.stack?.split("\n").slice(0, 5) : err.stack,
   });
 });
 
