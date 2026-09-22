@@ -12,7 +12,7 @@ const { GoogleGenAI } = require("@google/genai");
 const util = require("util");
 
 // ── Centralized model constant ──
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
 // ── Request timeout (ms) ──
 // Keep under Vercel's serverless function limit (10s on Hobby, 30s+ on Pro).
