@@ -98,12 +98,15 @@ async function postWeatherIntelligence(req, res) {
         geminiError.message
       );
       console.error("[WeatherIntel] Error type:", geminiError.constructor?.name);
+      console.error("[WeatherIntel] GEMINI_API_KEY set:", Boolean(process.env.GEMINI_API_KEY));
+      console.error("[WeatherIntel] GEMINI_MODEL:", process.env.GEMINI_MODEL || "(default)");
       if (geminiError.status) console.error("[WeatherIntel] HTTP status:", geminiError.status);
       if (geminiError.statusText) console.error("[WeatherIntel] Status text:", geminiError.statusText);
       return res.json({
         weatherRisks: addEmptyExplanations(deterministicRisks),
         aiUnavailable: true,
         cached: false,
+        _debug: process.env.NODE_ENV !== "production" ? { error: geminiError.message } : undefined,
       });
     }
 
