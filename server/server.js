@@ -1,3 +1,5 @@
+/* Deploy stamp: forces Vercel to rebuild the serverless function */
+const DEPLOY_STAMP = "2026-09-22T23:30Z";
 require("dotenv").config();
 
 const express = require("express");
@@ -78,6 +80,7 @@ app.get("/health", (req, res) => {
 // Temporary debug endpoint — remove after diagnosing Vercel 500s
 app.get("/debug", (req, res) => {
   res.status(200).json({
+    deployStamp: DEPLOY_STAMP,
     nodeVersion: process.version,
     expressVersion: require("express/package.json").version,
     env: {
