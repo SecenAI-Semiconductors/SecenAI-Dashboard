@@ -15,7 +15,9 @@ const util = require("util");
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 // ── Request timeout (ms) ──
-const REQUEST_TIMEOUT_MS = 25000;
+// Keep under Vercel's serverless function limit (10s on Hobby, 30s+ on Pro).
+// Leave ~1s headroom for Express overhead.
+const REQUEST_TIMEOUT_MS = parseInt(process.env.GEMINI_TIMEOUT_MS, 10) || 9000;
 
 // ── Safety system instruction ──
 const SYSTEM_INSTRUCTION = `You are an agricultural weather intelligence analyst. Your role is to interpret weather data for farming decisions.

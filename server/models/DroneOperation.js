@@ -10,6 +10,7 @@ const mongoose = require("mongoose");
  *   'field'      — agricultural field/location
  *   'flight'     — scheduled flight
  *   'missionLog' — completed/active mission record
+ *   'detection'  — pest/disease detection scan result
  *
  * All type-specific fields are optional at the schema level so any
  * docType can be created without validation errors on fields that
@@ -22,7 +23,7 @@ const droneOperationSchema = new mongoose.Schema(
     docType: {
       type: String,
       required: true,
-      enum: ["drone", "operator", "field", "flight", "missionLog"],
+      enum: ["drone", "operator", "field", "flight", "missionLog", "detection"],
       index: true,
     },
 
@@ -77,6 +78,34 @@ const droneOperationSchema = new mongoose.Schema(
         message: { type: String },
       },
     ],
+
+    // ── detection fields (pest/disease scan results) ───────────────
+    detectionId:      { type: String, sparse: true },   // e.g. "DET-001"
+    scanDate:         { type: Date,   default: null },
+    crop:             { type: String },                  // e.g. "Corn", "Rice"
+    region:           { type: String },                  // e.g. "North Karnataka"
+    latitude:         { type: Number },
+    longitude:        { type: Number },
+    healthScore:      { type: Number },                  // 0–100
+    severity:         { type: String },                  // Critical/High/Moderate/Low
+    affectedAcreage:  { type: Number },
+    estimatedLoss:    { type: Number },                  // in ₹
+
+    // Sub-objects stored as Mixed for flexibility
+    disease:          { type: mongoose.Schema.Types.Mixed },   // { name, scientificName, confidence, spreadRatePct, firstDetected }
+    treatment:        { type: mongoose.Schema.Types.Mixed },   // { product, preHealthScore, postHealthScore, cost, recoveryDays, appliedDate }
+
+    // Full analysis detail (for admin case detail drawer)
+    scanInfo:              { type: mongoose.Schema.Types.Mixed },
+    cropHealth:            { type: mongoose.Schema.Types.Mixed },
+    detectedIssue:         { type: mongoose.Schema.Types.Mixed },
+    whatIsIt:              { type: mongoose.Schema.Types.Mixed },
+    whyDidItHappen:        { type: mongoose.Schema.Types.Mixed },
+    symptomsFound:         { type: mongoose.Schema.Types.Mixed },
+    impactOnCrop:          { type: mongoose.Schema.Types.Mixed },
+    recommendedTreatment:  { type: mongoose.Schema.Types.Mixed },
+    preventionTips:        { type: mongoose.Schema.Types.Mixed },
+    aiRecommendations:     { type: mongoose.Schema.Types.Mixed },
   },
   { timestamps: true, collection: "droneoperations" }
 );
@@ -90,5 +119,7 @@ droneOperationSchema.index({ docType: 1, flightId: 1 });
 droneOperationSchema.index({ docType: 1, missionId: 1 });
 droneOperationSchema.index({ docType: 1, status: 1 });
 droneOperationSchema.index({ docType: 1, date: -1 });
+droneOperationSchema.index({ docType: 1, detectionId: 1 });
+droneOperationSchema.index({ docType: 1, scanDate: -1 });
 
 module.exports = mongoose.model("DroneOperation", droneOperationSchema);
