@@ -18,6 +18,7 @@ const ROUTE_CONFIG = {
   '/':                            { title: 'SecenAI',              backTo: null },
   '/admin':                       { title: 'Admin Dashboard',      backTo: '/' },
   '/admin/farmer-management':     { title: 'Farmer Management',    backTo: '/admin' },
+  '/admin/crop-yield-analytics':  { title: 'Crop & Yield Analytics', backTo: '/admin' },
   '/farmer':                      { title: 'Farmer Dashboard',     backTo: '/' },
   '/farmer/drone-pest-detection': { title: 'Drone Pest Detection', backTo: '/farmer' },
   '/farmer/market-intelligence':  { title: 'Market Intelligence',  backTo: '/farmer' },
