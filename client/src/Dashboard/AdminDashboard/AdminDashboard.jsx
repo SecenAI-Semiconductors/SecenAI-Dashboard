@@ -21,7 +21,7 @@ const adminFeatures = [
     title: 'Crop & Yield Analytics',
     desc: 'Track crop performance, harvest forecasts, and yield comparisons.',
     icon: icons.cropYield,
-    route: null,
+    route: '/admin/crop-yield-analytics',
   },
   {
     id: 'crop-insurance-mgmt',
