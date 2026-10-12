@@ -10,6 +10,7 @@ import { MarketIntelligence } from './Dashboard/FarmerDashboard/MarketIntelligen
 import { WeatherDashboard } from './Dashboard/FarmerDashboard/Weather/WeatherDashboard'
 import { CropInsurance } from './Dashboard/FarmerDashboard/CropInsurance/CropInsurance'
 import { SoilIntelligence } from './Dashboard/FarmerDashboard/SoilIntelligence/SoilIntelligence'
+import { AIAssistant } from './Dashboard/FarmerDashboard/AIAssistant/AIAssistant'
 import { CropInsuranceManagement } from './Dashboard/AdminDashboard/CropInsuranceManagement/CropInsuranceManagement'
 import { DroneOperations } from './Dashboard/AdminDashboard/DroneOperations/DroneOperations'
 import { DiseaseAnalytics } from './Dashboard/AdminDashboard/DiseaseAnalytics/DiseaseAnalytics'
@@ -45,6 +46,7 @@ function App() {
         <Route path="/farmer/weather-intelligence" element={<WeatherDashboard />} />
         <Route path="/farmer/crop-insurance" element={<CropInsurance />} />
         <Route path="/farmer/soil-intelligence" element={<SoilIntelligence />} />
+        <Route path="/farmer/ai-assistant" element={<AIAssistant />} />
       </Route>
     </Routes>
   )

@@ -42,7 +42,7 @@ const farmerFeatures = [
     title: 'AI Assistant',
     desc: 'Your personal farming assistant for queries and recommendations.',
     icon: icons.ai,
-    route: null,
+    route: '/farmer/ai-assistant',
   },
 ]
 
