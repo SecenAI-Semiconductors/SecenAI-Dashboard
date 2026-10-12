@@ -23,6 +23,7 @@ const ROUTE_CONFIG = {
   '/farmer/drone-pest-detection': { title: 'Drone Pest Detection', backTo: '/farmer' },
   '/farmer/market-intelligence':  { title: 'Market Intelligence',  backTo: '/farmer' },
   '/farmer/weather-intelligence': { title: 'Weather Intelligence', backTo: '/farmer' },
+  '/farmer/ai-assistant':          { title: 'AI Assistant',          backTo: '/farmer' },
 }
 
 /* Fallback for unknown routes */

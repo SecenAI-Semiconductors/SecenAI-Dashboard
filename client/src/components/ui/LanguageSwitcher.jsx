@@ -23,69 +23,86 @@ const SUPPORTED_LANGUAGES = [
   { code: 'mr', name: 'Marathi' },
 ]
 
-const STORAGE_KEY = 'gtranslate_lang'
-const SCRIPT_SRC = 'https://cdn.gtranslate.net/widgets/latest/dropdown.js'
-
-/* ── Read config from env with fallbacks ── */
-const DEFAULT_LANGUAGE =
-  import.meta.env.VITE_GTRANSLATE_DEFAULT_LANGUAGE || 'en'
+const STORAGE_KEY = 'googtrans_lang'
+const DEFAULT_LANGUAGE = 'en'
 
 /**
- * Loads the GTranslate script exactly once, no matter how many
- * LanguageSwitcher instances mount across routes.
+ * Loads the official Google Translate Element script exactly once.
+ * Works on localhost with no API key — free and no GTranslate CDN plan needed.
+ * The script injects a hidden <select class="goog-te-combo"> which we drive
+ * programmatically to change the page language without a page reload.
  */
 function loadGTranslateScript() {
-  if (window.__gtranslateLoaded) return
+  if (window.__gTranslateLoaded) return
+  window.__gTranslateLoaded = true
 
-  window.__gtranslateLoaded = true
+  // Callback the Translate Element calls once it's ready
+  window.googleTranslateElementInit = function () {
+    // eslint-disable-next-line no-new
+    new window.google.translate.TranslateElement(
+      {
+        pageLanguage: DEFAULT_LANGUAGE,
+        includedLanguages: SUPPORTED_LANGUAGES.map((l) => l.code).join(','),
+        autoDisplay: false,
+      },
+      'google_translate_element'
+    )
 
-  // Set GTranslate config before loading the script
-  window.gtranslateSettings = {
-    default_language: DEFAULT_LANGUAGE,
-    languages: SUPPORTED_LANGUAGES.map((l) => l.code),
-    wrapper_selector: '.gtranslate_wrapper',
-    detect_browser_language: false,
+    // ── Kill the Google Translate toolbar banner ──
+    // Google injects a fixed iframe + shifts body.style.top by ~40px.
+    // We use both CSS (LanguageSwitcher.css) AND this observer so that
+    // inline-style overrides are also caught and reversed immediately.
+    const stripBanner = () => {
+      // Remove the banner iframe
+      const banner = document.querySelector('.goog-te-banner-frame')
+      if (banner) banner.style.display = 'none'
+      // Reset body top offset that Google adds
+      if (document.body.style.top && document.body.style.top !== '0px') {
+        document.body.style.top = '0px'
+      }
+    }
+
+    stripBanner()
+
+    const observer = new MutationObserver(stripBanner)
+    observer.observe(document.body, { childList: true, subtree: false, attributes: true, attributeFilter: ['style'] })
   }
 
   const script = document.createElement('script')
-  script.src = SCRIPT_SRC
-  script.defer = true
-
+  script.src =
+    'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'
+  script.async = true
   script.onerror = () => {
-    console.error('[LanguageSwitcher] Failed to load GTranslate script.')
-    window.__gtranslateLoaded = false // allow retry on next mount
+    console.error('[LanguageSwitcher] Failed to load Google Translate script.')
+    window.__gTranslateLoaded = false
   }
-
   document.body.appendChild(script)
 }
 
 /**
- * Triggers GTranslate to change the page language.
- * GTranslate uses a cookie named "googtrans" and manipulates the DOM.
- * We set the cookie and reload the translate engine.
+ * Change page language by setting the value on the hidden goog-te-combo
+ * <select> that Google Translate injects, then firing a change event.
+ * Falls back to cookie + reload if the element isn't ready yet.
  */
 function doGTranslate(langCode) {
-  if (langCode === DEFAULT_LANGUAGE) {
-    // Reset to original language
-    document.cookie =
-      'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
-    document.cookie =
-      'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' +
-      window.location.hostname
-
-    // Attempt to restore original content
-    if (typeof window.location.reload === 'function') {
-      window.location.reload()
-    }
+  // Try the live Google Translate combo select (no reload needed)
+  const combo = document.querySelector('.goog-te-combo')
+  if (combo) {
+    combo.value = langCode
+    combo.dispatchEvent(new Event('change'))
     return
   }
 
-  // Set the googtrans cookie for GTranslate
+  // Fallback: set googtrans cookie and reload
+  // (only needed on first load before the element has initialised)
+  if (langCode === DEFAULT_LANGUAGE) {
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/'
+    window.location.reload()
+    return
+  }
   const value = `/${DEFAULT_LANGUAGE}/${langCode}`
   document.cookie = `googtrans=${value}; path=/`
-  document.cookie = `googtrans=${value}; path=/; domain=.${window.location.hostname}`
-
-  // Reload the page so GTranslate picks up the new cookie
+  // NOTE: do NOT set domain=.localhost — browsers silently reject it
   window.location.reload()
 }
 
@@ -93,18 +110,17 @@ function doGTranslate(langCode) {
  * Get the currently active language from cookie or localStorage.
  */
 function getActiveLanguage() {
-  // Check localStorage first
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored && SUPPORTED_LANGUAGES.some((l) => l.code === stored)) {
-    return stored
-  }
-
-  // Check googtrans cookie
+  // Cookie is the source of truth after a Google Translate reload.
+  // If no cookie exists the page is in the default language (English),
+  // so ignore any stale localStorage value.
   const match = document.cookie.match(/googtrans=\/[^/]+\/([^;]+)/)
-  if (match && match[1]) {
+  if (match && match[1] && SUPPORTED_LANGUAGES.some((l) => l.code === match[1])) {
     return match[1]
   }
 
+  // No cookie → page is in English (or cookie was cleared).
+  // Trust localStorage only when there IS an active translation cookie,
+  // otherwise it may be stale from a previous session.
   return DEFAULT_LANGUAGE
 }
 
@@ -119,7 +135,7 @@ function LanguageSwitcherInner() {
   const menuRef = useRef(null)
   const btnRef = useRef(null)
 
-  /* ── Load GTranslate script on first mount ── */
+  /* ── Load Google Translate Element script on first mount ── */
   useEffect(() => {
     try {
       loadGTranslateScript()
@@ -129,11 +145,11 @@ function LanguageSwitcherInner() {
   }, [])
 
   /* ── Restore persisted language on mount ── */
+  // (getActiveLanguage already reads the cookie on init, so activeLang
+  //  is correct; this effect is kept only as a no-op safety net.)
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved && saved !== DEFAULT_LANGUAGE && saved !== activeLang) {
-      setActiveLang(saved)
-    }
+    // activeLang is already initialised from the cookie in getActiveLanguage().
+    // Nothing extra needed here.
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Close dropdown on outside click ── */
@@ -177,7 +193,15 @@ function LanguageSwitcherInner() {
       }
 
       setActiveLang(langCode)
-      localStorage.setItem(STORAGE_KEY, langCode)
+
+      // When switching to English, clear localStorage so that after the
+      // page reload (which clears the cookie) activeLang is not stale.
+      if (langCode === DEFAULT_LANGUAGE) {
+        localStorage.removeItem(STORAGE_KEY)
+      } else {
+        localStorage.setItem(STORAGE_KEY, langCode)
+      }
+
       setIsOpen(false)
 
       // Give the UI a moment to update before triggering translation
@@ -266,7 +290,7 @@ function LanguageSwitcherInner() {
           <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
         </svg>
 
-        <span className="language-switcher-label">{activeLangObj.name}</span>
+        <span className="language-switcher-label notranslate" translate="no">{activeLangObj.name}</span>
 
         {/* Chevron */}
         <svg
@@ -285,19 +309,20 @@ function LanguageSwitcherInner() {
 
       {/* ── Dropdown menu ── */}
       <ul
-        className="language-switcher-menu"
+        className="language-switcher-menu notranslate"
         ref={menuRef}
         role="listbox"
         aria-label="Select language"
         onKeyDown={handleMenuKeyDown}
         id="language-switcher-menu"
+        translate="no"
       >
         {SUPPORTED_LANGUAGES.map((lang) => (
           <li key={lang.code} role="presentation">
             <button
               type="button"
               role="option"
-              className={`language-switcher-option${
+              className={`language-switcher-option notranslate${
                 lang.code === activeLang
                   ? ' language-switcher-option--active'
                   : ''
@@ -306,6 +331,7 @@ function LanguageSwitcherInner() {
               onClick={() => handleSelect(lang.code)}
               tabIndex={isOpen ? 0 : -1}
               id={`language-option-${lang.code}`}
+              translate="no"
             >
               {lang.name}
             </button>
@@ -313,8 +339,8 @@ function LanguageSwitcherInner() {
         ))}
       </ul>
 
-      {/* ── Hidden GTranslate wrapper (functional, visually hidden) ── */}
-      <div className="gtranslate_wrapper" aria-hidden="true" />
+      {/* ── Hidden Google Translate Element mount point (visually hidden, functional) ── */}
+      <div id="google_translate_element" aria-hidden="true" style={{ display: 'none' }} />
     </div>
   )
 }
