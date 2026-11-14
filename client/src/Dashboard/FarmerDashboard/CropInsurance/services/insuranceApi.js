@@ -1,56 +1,36 @@
 /**
  * insuranceApi.js
  *
- * Thin wrapper around the global insuranceService.
- * Provides module-specific defaults so all CropInsurance
- * components share one fetch strategy.
+ * Thin wrapper around insuranceService for the farmer CropInsurance page.
+ * All calls go through /api/farmer/insurance — the server sets farmerId
+ * from the JWT, so we never send farmerId in the body.
  */
 
 import insuranceService from '../../../../services/insuranceService'
 
-/**
- * Fetch all insurance requests.
- * @returns {Promise<Array>}
- */
+/** Fetch only the logged-in farmer's own requests. */
 export async function fetchInsuranceRequests() {
-  return insuranceService.getAll()
+  return insuranceService.getMyInsurance()
 }
 
-/**
- * Fetch a single insurance request by ID.
- * @param {string} id
- * @returns {Promise<Object>}
- */
+/** Fetch a single request by ID (ownership enforced server-side). */
 export async function fetchInsuranceById(id) {
-  return insuranceService.getById(id)
+  return insuranceService.getMyInsuranceById(id)
 }
 
-/**
- * Submit a new insurance application.
- * @param {Object} data
- * @returns {Promise<Object>}
- */
+/** Submit a new insurance application. */
 export async function submitInsurance(data) {
-  return insuranceService.create(data)
+  return insuranceService.createMine(data)
 }
 
-/**
- * Update an existing insurance application.
- * @param {string} id
- * @param {Object} data
- * @returns {Promise<Object>}
- */
+/** Update an existing application (ownership enforced server-side). */
 export async function updateInsurance(id, data) {
-  return insuranceService.update(id, data)
+  return insuranceService.updateMine(id, data)
 }
 
-/**
- * Delete an insurance application.
- * @param {string} id
- * @returns {Promise<Object>}
- */
+/** Delete an application (ownership enforced server-side). */
 export async function deleteInsurance(id) {
-  return insuranceService.delete(id)
+  return insuranceService.deleteMine(id)
 }
 
 export { insuranceService }

@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
+const authMiddleware = require("../middleware/authMiddleware");
+const requireRole   = require("../middleware/requireRole");
+
 const {
   getOverview,
   getOutbreaks,
@@ -10,7 +13,9 @@ const {
   getCaseById,
 } = require("../controllers/adminDiseaseAnalyticsController");
 
-// ── Disease & Pest Analytics (Admin) ──────────────────────────────
+// ── Disease & Pest Analytics (JWT + admin required) ────────────────
+router.use(authMiddleware, requireRole("admin"));
+
 router.get("/overview",                 getOverview);
 router.get("/outbreaks",                getOutbreaks);
 router.get("/heatmap",                  getHeatmap);

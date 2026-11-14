@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+﻿import { useState, useEffect, useCallback, useMemo } from 'react'
 import farmerService from '../../../services/farmerService'
 import { FarmerTable, TableSkeleton } from './FarmerTable'
 import { FarmerModal } from './FarmerModal'
@@ -6,6 +6,7 @@ import { FarmerViewDrawer } from './FarmerViewDrawer'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { useToast, ToastContainer } from './Toast'
 import './FarmerManagement.css'
+import { TempPasswordDialog } from './TempPasswordDialog'
 
 /**
  * Main Farmer Management page.
@@ -33,6 +34,10 @@ export function FarmerManagement() {
   // ── Delete state ──
   const [deletingFarmer, setDeletingFarmer] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Temp password dialog state (shown once after admin creates a farmer)
+  const [tempPassword, setTempPassword] = useState(null)
+  const [tempPasswordFarmerName, setTempPasswordFarmerName] = useState('')
 
   // ── Fetch farmers ──
   const fetchFarmers = useCallback(async () => {
@@ -126,8 +131,14 @@ export function FarmerManagement() {
         await farmerService.update(editingFarmer._id, formData)
         showToast('Farmer updated successfully', 'success')
       } else {
-        await farmerService.create(formData)
-        showToast('Farmer created successfully', 'success')
+        // Map fullName -> name as the backend expects 'name'
+        const payload = { ...formData, name: formData.fullName }
+        const result = await farmerService.createWithAuth(payload)
+        showToast('Farmer account created successfully', 'success')
+        if (result.temporaryPassword) {
+          setTempPasswordFarmerName(formData.fullName || 'Farmer')
+          setTempPassword(result.temporaryPassword)
+        }
       }
 
       setShowModal(false)
@@ -273,6 +284,15 @@ export function FarmerManagement() {
           isDeleting={isDeleting}
           onConfirm={handleDeleteConfirm}
           onCancel={() => setDeletingFarmer(null)}
+        />
+      )}
+
+      {/* Temp password dialog */}
+      {tempPassword && (
+        <TempPasswordDialog
+          password={tempPassword}
+          farmerName={tempPasswordFarmerName}
+          onClose={() => setTempPassword(null)}
         />
       )}
 

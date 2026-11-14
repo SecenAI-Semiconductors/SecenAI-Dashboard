@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { icons } from '../../components/ui/icons'
+import { useAuth } from '../../context/AuthContext'
 
 const adminFeatures = [
   {
@@ -21,7 +23,7 @@ const adminFeatures = [
     title: 'Crop & Yield Analytics',
     desc: 'Track crop performance, harvest forecasts, and yield comparisons.',
     icon: icons.cropYield,
-    route: null,
+    route: '/admin/crop-yield-analytics',
   },
   {
     id: 'crop-insurance-mgmt',
@@ -41,15 +43,19 @@ const adminFeatures = [
 
 export function AdminDashboard() {
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   return (
     <div className="dashboard-view" id="admin-dashboard">
       {/* Content */}
       <section className="dashboard-content">
-        <h1 className="dashboard-heading">Platform Management</h1>
-        <p className="dashboard-subheading">
-          Monitor operations and manage the agriculture platform.
-        </p>
+        {/* Header */}
+        <div>
+          <h1 className="dashboard-heading">Platform Management</h1>
+          <p className="dashboard-subheading">
+            {user?.name ? `Welcome, ${user.name}. ` : ''}Monitor operations and manage the agriculture platform.
+          </p>
+        </div>
 
         <div className="feature-cards">
           {adminFeatures.map((f) => (
@@ -65,7 +71,7 @@ export function AdminDashboard() {
               <span className="feature-card-desc">{f.desc}</span>
               {f.route && (
                 <span className="feature-card-arrow">
-                  Manage →
+                  Manage &rarr;
                 </span>
               )}
             </div>

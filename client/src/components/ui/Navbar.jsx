@@ -2,36 +2,58 @@
  * Navbar.jsx
  *
  * Shared navigation bar rendered once across all pages via the
- * AppLayout wrapper. Auto-configures title and back-button
- * destination based on the current route.
+ * AppLayout wrapper. Auto-configures title and right-side action
+ * based on the current route:
  *
- * Usage: Rendered by AppLayout in App.jsx — no manual imports needed.
+ *   /farmer or /admin  → Sign Out button
+ *   /farmer/* or /admin/*  → ← Back button (to dashboard root)
+ *   anything else  → nothing
  */
 
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import { InstallButton } from '../../pwa/InstallButton'
+import { icons } from './icons'
 import './Navbar.css'
 
-/* ── Route → navbar config mapping ── */
-const ROUTE_CONFIG = {
-  '/':                            { title: 'SecenAI',              backTo: null },
-  '/admin':                       { title: 'Admin Dashboard',      backTo: '/' },
-  '/admin/farmer-management':     { title: 'Farmer Management',    backTo: '/admin' },
-  '/farmer':                      { title: 'Farmer Dashboard',     backTo: '/' },
-  '/farmer/drone-pest-detection': { title: 'Drone Pest Detection', backTo: '/farmer' },
-  '/farmer/market-intelligence':  { title: 'Market Intelligence',  backTo: '/farmer' },
-  '/farmer/weather-intelligence': { title: 'Weather Intelligence', backTo: '/farmer' },
+/* ── Route → navbar title mapping ── */
+const ROUTE_TITLES = {
+  '/':                            'SecenAI',
+  '/admin':                       'Admin Dashboard',
+  '/admin/farmer-management':     'Farmer Management',
+  '/admin/crop-yield-analytics':  'Crop & Yield Analytics',
+  '/admin/settings':              'Account Settings',
+  '/farmer':                      'Farmer Dashboard',
+  '/farmer/drone-pest-detection': 'Drone Pest Detection',
+  '/farmer/market-intelligence':  'Market Intelligence',
+  '/farmer/weather-intelligence': 'Weather Intelligence',
+  '/farmer/ai-assistant':         'AI Assistant',
+  '/farmer/crop-insurance':       'Crop Insurance',
+  '/farmer/soil-intelligence':    'Soil Intelligence',
+  '/farmer/settings':             'Account Settings',
 }
 
-/* Fallback for unknown routes */
-const DEFAULT_CONFIG = { title: 'SecenAI', backTo: '/' }
+function getNavAction(pathname) {
+  if (pathname === '/farmer' || pathname === '/admin') {
+    return { type: 'signout' }
+  }
+  if (pathname.startsWith('/farmer/')) {
+    return { type: 'back', to: '/farmer' }
+  }
+  if (pathname.startsWith('/admin/')) {
+    return { type: 'back', to: '/admin' }
+  }
+  return { type: 'none' }
+}
 
 export function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { logout } = useAuth()
 
-  const config = ROUTE_CONFIG[location.pathname] || DEFAULT_CONFIG
+  const title = ROUTE_TITLES[location.pathname] ?? 'SecenAI'
+  const action = getNavAction(location.pathname)
 
   return (
     <nav
@@ -44,36 +66,66 @@ export function Navbar() {
       <div className="topbar-left">
         <div
           className="topbar-brand-icon"
-          onClick={() => navigate('/')}
-          title="Go to home"
+          onClick={() => {
+            if (location.pathname.startsWith('/admin')) navigate('/admin')
+            else if (location.pathname.startsWith('/farmer')) navigate('/farmer')
+            else navigate('/')
+          }}
+          title="Go to dashboard"
           role="link"
           tabIndex={0}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
-              navigate('/')
+              if (location.pathname.startsWith('/admin')) navigate('/admin')
+              else if (location.pathname.startsWith('/farmer')) navigate('/farmer')
+              else navigate('/')
             }
           }}
-          aria-label="Go to home"
+          aria-label="Go to dashboard"
         >
           S
         </div>
-        <span className="topbar-title">{config.title}</span>
+        <span className="topbar-title">{title}</span>
       </div>
 
-      {/* ── Right: Language, Install, Back ── */}
+      {/* ── Right: Language, Install, Settings, Back / Sign Out ── */}
       <div className="topbar-right">
         <LanguageSwitcher />
         <InstallButton />
-        {config.backTo && (
+        {action.type === 'back' && (
           <button
             type="button"
             className="topbar-back-btn"
-            onClick={() => navigate(config.backTo)}
+            onClick={() => navigate(action.to)}
             id="navbar-back-button"
           >
             ← Back
           </button>
+        )}
+        {action.type === 'signout' && (
+          <>
+            <button
+              type="button"
+              className="topbar-back-btn topbar-settings-btn"
+              onClick={() => navigate(
+                location.pathname.startsWith('/admin') ? '/admin/settings' : '/farmer/settings'
+              )}
+              id="navbar-settings-button"
+              title="Account settings"
+            >
+              <span className="navbar-settings-icon" aria-hidden="true">{icons.settings}</span>
+              <span>Settings</span>
+            </button>
+            <button
+              type="button"
+              className="topbar-back-btn topbar-signout-btn"
+              onClick={logout}
+              id="navbar-signout-button"
+            >
+              Sign Out
+            </button>
+          </>
         )}
       </div>
     </nav>

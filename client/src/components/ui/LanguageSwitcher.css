@@ -129,17 +129,47 @@
   color: var(--accent-green);
 }
 
-/* ── Hidden GTranslate wrapper (off-screen, functional only) ── */
+/* ── Suppress Google Translate toolbar / banner — all known selectors ──
+   pointer-events:none ensures GT elements NEVER block clicks on the page,
+   even if display:none is overridden by the widget script.              */
 
-.language-switcher .gtranslate_wrapper {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+/* The main top banner iframe */
+.goog-te-banner-frame {
+  display: none !important;
+  pointer-events: none !important;
 }
+
+/* Tooltip / bubble overlays */
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-te-menu-frame,
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-text-highlight {
+  display: none !important;
+  pointer-events: none !important;
+  box-shadow: none !important;
+}
+
+/* The injected fixed <div> wrapper Google adds in some browsers */
+.skiptranslate {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Chrome-specific GT widget iframe */
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Undo the inline "top: 40px" Google applies to <body> */
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
 
 /* ── Responsive ── */
 

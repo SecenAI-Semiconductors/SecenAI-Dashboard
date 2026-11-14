@@ -1030,3 +1030,38 @@
     display: none;
   }
 }
+
+/* ── Farmer View Drawer — crops section ───────────── */
+.fm-drawer-crops {
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--border-light, #e8f0ea);
+}
+
+.fm-crops-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.fm-crop-tag {
+  display: flex;
+  flex-direction: column;
+  background: #f0f7f1;
+  border: 1px solid #c8e0cc;
+  border-radius: 8px;
+  padding: 6px 12px;
+  min-width: 120px;
+}
+
+.fm-crop-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-green, #22783c);
+}
+
+.fm-crop-meta {
+  font-size: 11px;
+  color: var(--text-muted, #6b7a6e);
+  margin-top: 2px;
+}
