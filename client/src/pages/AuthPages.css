@@ -268,9 +268,26 @@
    ────────────────────────────────────────────────────────────────── */
 .auth-lang-row {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
   margin-bottom: 8px;
   /* Negative margin compensates for card padding so the switcher
      aligns with the card edge without extra whitespace above the brand */
   margin-top: -4px;
+}
+
+.auth-home-link {
+  margin-right: auto;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.auth-home-link:hover {
+  color: var(--accent-green);
+}
+
+.auth-footer-divider {
+  margin: 0 8px;
+  color: var(--text-muted);
 }

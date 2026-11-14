@@ -86,6 +86,11 @@ const userSchema = new mongoose.Schema(
       default: "English",
     },
 
+    profileSetupRequired: {
+      type:    Boolean,
+      default: false,
+    },
+
     village: {
       type: String,
       trim: true,

@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
   // ── logout() ──────────────────────────────────────────────────────
   const logout = useCallback(() => {
     clearAuth()
-    navigate('/login', { replace: true })
+    navigate('/', { replace: true })
   }, [clearAuth, navigate])
 
   const value = {

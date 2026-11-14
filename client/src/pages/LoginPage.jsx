@@ -50,8 +50,11 @@ export function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
 
-        {/* Language switcher — visible before login, top-right of card */}
+        {/* Public navigation — available before login */}
         <div className="auth-lang-row">
+          <Link to="/" className="auth-home-link" aria-label="Go to SecenAI home">
+            ← Home
+          </Link>
           <LanguageSwitcher />
         </div>
 
@@ -151,6 +154,8 @@ export function LoginPage() {
         <p className="auth-footer-text">
           New farmer?{' '}
           <Link to="/register" className="auth-link">Create an account</Link>
+          <span className="auth-footer-divider" aria-hidden="true">·</span>
+          <Link to="/" className="auth-link">Home</Link>
         </p>
       </div>
     </div>

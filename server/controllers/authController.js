@@ -31,6 +31,9 @@ function safeUser(user) {
     phone:             user.phone  || null,
     mustChangePassword: user.mustChangePassword,
     isActive:          user.isActive,
+    profileSetupRequired: user.profileSetupRequired,
+    totalLandArea:     user.totalLandArea,
+    crops:             user.crops,
   };
 }
 
@@ -92,6 +95,7 @@ exports.register = async (req, res) => {
       role:              "farmer",   // hard-coded; body is ignored for role
       isActive:          true,
       mustChangePassword: false,
+      profileSetupRequired: true,
       district:          district?.trim() || undefined,
       state:             state?.trim()    || undefined,
     });
@@ -194,6 +198,7 @@ exports.getMe = async (req, res) => {
       phone:             user.phone  || null,
       mustChangePassword: user.mustChangePassword,
       isActive:          user.isActive,
+      profileSetupRequired: user.profileSetupRequired,
       language:          user.language,
       village:           user.village   || null,
       district:          user.district  || null,

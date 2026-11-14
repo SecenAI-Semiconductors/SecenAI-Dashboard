@@ -8,6 +8,21 @@
 
 import api from '../../../services/api'
 
+const CROP_ALIASES = {
+  rice: 'Rice (Paddy)',
+  paddy: 'Rice (Paddy)',
+  'rice (paddy)': 'Rice (Paddy)',
+  redgram: 'Redgram (Tur)',
+  tur: 'Redgram (Tur)',
+  'redgram (tur)': 'Redgram (Tur)',
+}
+
+function normalizeCropName(name) {
+  const trimmed = name?.trim()
+  if (!trimmed) return 'Unknown Crop Field'
+  return CROP_ALIASES[trimmed.toLowerCase()] || trimmed
+}
+
 // ── Internal cache (loaded once per navigation to the page) ───────────────
 
 let _cache = null
@@ -27,7 +42,7 @@ function buildRecords(analytics) {
   const records = []
   let idx = 0
   for (const farmer of (analytics.farmerList || [])) {
-    if (farmer.incomplete || !farmer.crops?.length) continue
+    if (!farmer.crops?.length) continue
     for (const crop of farmer.crops) {
       records.push({
         _id:          `r-${farmer._id}-${idx++}`,
@@ -36,7 +51,7 @@ function buildRecords(analytics) {
         plotName:     `${farmer.village || farmer.district || 'Field'} Plot`,
         district:     farmer.district || 'Unknown',
         state:        farmer.state || 'Unknown',
-        crop:         crop.name?.trim() || 'Unknown Crop Field',
+        crop:         normalizeCropName(crop.name),
         area:         crop.area || 0,
         // Yield data not available in DB — honest null
         expectedYield: null,
