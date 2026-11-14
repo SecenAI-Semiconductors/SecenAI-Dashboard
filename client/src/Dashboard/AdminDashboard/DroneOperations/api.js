@@ -1,130 +1,93 @@
 /**
  * api.js — Drone Operations API client
  *
- * Thin fetch wrappers that call the Express backend.
- * All functions return data in the same shape the components previously
- * got from mockData.js, so the components themselves need minimal changes.
- *
- * Base URL and API key are read from Vite env vars:
- *   VITE_API_BASE_URL       e.g. "http://localhost:5000"
- *   VITE_API_SECRET_KEY     optional — only enforced in production
+ * Uses the shared Axios instance from services/api.js so the JWT token
+ * is auto-attached to every request (required now that all drone routes
+ * are JWT + admin protected).
  */
 
-const BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(/\/+$/, "");
-
-const HEADERS = {
-  "Content-Type": "application/json",
-  "x-api-key": import.meta.env.VITE_API_SECRET_KEY || "",
-};
-
-async function apiFetch(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, {
-    ...options,
-    headers: { ...HEADERS, ...(options.headers || {}) },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.message || `API error ${res.status}`);
-  }
-  return res.json();
-}
+import api from '../../../services/api';
 
 // ── Drones ────────────────────────────────────────────────────────────────────
 
-/**
- * GET /api/drones
- * Returns [{ id, model, status, battery, gpsSignal, connectivity, mission, lastActivity }]
- */
-export function getDrones() {
-  return apiFetch("/api/drones");
+export async function getDrones() {
+  const res = await api.get('/api/drones');
+  return res.data;
 }
 
-/**
- * PATCH /api/drones/:id
- * Update a drone's status, battery, etc.
- */
-export function updateDrone(droneId, patch) {
-  return apiFetch(`/api/drones/${droneId}`, {
-    method: "PATCH",
-    body: JSON.stringify(patch),
-  });
+export async function updateDrone(droneId, patch) {
+  const res = await api.patch(`/api/drones/${droneId}`, patch);
+  return res.data;
 }
 
 // ── Reference Data ─────────────────────────────────────────────────────────────
 
-/**
- * GET /api/operators
- * Returns [{ id, name, zone }]
- */
-export function getOperators() {
-  return apiFetch("/api/operators");
+export async function getOperators() {
+  const res = await api.get('/api/operators');
+  return res.data;
+}
+
+export async function getFields() {
+  const res = await api.get('/api/fields');
+  return res.data;
+}
+
+// ── Farmer lookup (for FlightScheduling UI) ────────────────────────────────────
+
+/** Returns all farmers as [{ _id, fullName, phone, village, district, state }] */
+export async function getFarmers() {
+  const res = await api.get('/api/admin/drone/farmers');
+  return res.data;
 }
 
 /**
- * GET /api/fields
- * Returns [{ id, name, district, state, area }]
+ * Returns one farmer's profile for auto-filling field/location:
+ * { _id, fullName, phone, village, district, state, totalLandArea, crops[] }
  */
-export function getFields() {
-  return apiFetch("/api/fields");
+export async function getFarmerById(farmerId) {
+  const res = await api.get(`/api/admin/drone/farmer/${farmerId}`);
+  return res.data;
 }
 
 // ── Flights ───────────────────────────────────────────────────────────────────
 
-/**
- * GET /api/flights
- * Returns upcoming scheduled flights:
- * [{ id, droneId, droneModel, fieldId, fieldName, missionType, operatorId, operatorName, scheduledAt, status }]
- */
-export function getFlights() {
-  return apiFetch("/api/flights");
+export async function getFlights() {
+  const res = await api.get('/api/flights');
+  return res.data;
 }
 
 /**
- * POST /api/flights
  * Schedule a new flight.  Returns { readiness, flight }.
- * - readiness: { battery, gps, connectivity, droneStatus } — pre-flight check from server
- * - flight:    the created ScheduledFlight in frontend shape
- *
- * @param {{ droneId, operatorId, fieldId, missionType, date, time }} payload
+ * @param {{ droneId, operatorId, fieldId, missionType, date, time, farmerId? }} payload
  */
-export function scheduleFlight(payload) {
-  return apiFetch("/api/flights", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+export async function scheduleFlight(payload) {
+  const res = await api.post('/api/flights', payload);
+  return res.data;
 }
 
 // ── Missions ──────────────────────────────────────────────────────────────────
 
-/**
- * GET /api/missions
- * Supports optional query filters: search, status, type.
- * Returns [{ id, date, droneId, droneModel, operatorId, operatorName,
- *             fieldName, missionType, duration, status, coverage, summary, alerts }]
- */
-export function getMissions({ search = "", status = "All", type = "All" } = {}) {
+export async function getMissions({ search = '', status = 'All', type = 'All' } = {}) {
   const params = new URLSearchParams();
-  if (search) params.set("search", search);
-  if (status && status !== "All") params.set("status", status);
-  if (type   && type   !== "All") params.set("type", type);
+  if (search) params.set('search', search);
+  if (status && status !== 'All') params.set('status', status);
+  if (type   && type   !== 'All') params.set('type', type);
   const qs = params.toString();
-  return apiFetch(`/api/missions${qs ? `?${qs}` : ""}`);
+  const res = await api.get(`/api/missions${qs ? `?${qs}` : ''}`);
+  return res.data;
 }
 
-/**
- * GET /api/missions/:id
- * Returns a single mission by its missionId string (e.g. "MSN-2024-018").
- */
-export function getMissionById(missionId) {
-  return apiFetch(`/api/missions/${missionId}`);
+export async function getMissionById(missionId) {
+  const res = await api.get(`/api/missions/${missionId}`);
+  return res.data;
 }
 
-// ── Static reference lists (kept for MISSION_TYPES which has no API) ──────────
+// ── Static reference lists ─────────────────────────────────────────────────────
 export const MISSION_TYPES = [
-  "Pest & Disease Detection",
-  "Crop Health Survey",
-  "Irrigation Mapping",
-  "Soil Analysis Scan",
-  "Yield Estimation",
-  "Field Boundary Mapping",
+  'Pest & Disease Detection',
+  'Crop Health Survey',
+  'Irrigation Mapping',
+  'Soil Analysis Scan',
+  'Yield Estimation',
+  'Field Boundary Mapping',
 ];

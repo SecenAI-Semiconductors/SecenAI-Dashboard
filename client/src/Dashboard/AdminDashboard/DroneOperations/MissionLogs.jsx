@@ -82,6 +82,7 @@ export function MissionLogs() {
               <tr>
                 <th>Mission ID</th>
                 <th>Date</th>
+                <th>Farmer</th>
                 <th>Drone</th>
                 <th>Operator</th>
                 <th>Field</th>
@@ -93,7 +94,7 @@ export function MissionLogs() {
             <tbody>
               {missions.length === 0 ? (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-secondary)' }}>
+                  <td colSpan={9} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-secondary)' }}>
                     No missions match your filters.
                   </td>
                 </tr>
@@ -107,6 +108,9 @@ export function MissionLogs() {
                   >
                     <td style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 600 }}>{mission.id}</td>
                     <td style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{formatDate(mission.date)}</td>
+                    <td style={{ fontSize: 13, color: mission.farmerId ? 'inherit' : 'var(--text-secondary)', fontStyle: mission.farmerId ? 'normal' : 'italic' }}>
+                      {mission.farmerName || 'Unassigned'}
+                    </td>
                     <td style={{ fontWeight: 500 }}>{mission.droneId}</td>
                     <td>{mission.operatorName}</td>
                     <td style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{mission.fieldName}</td>

@@ -63,6 +63,13 @@ export function FarmerViewDrawer({ farmer, onClose }) {
               label="State"
               value={farmer.state || '—'}
             />
+            {farmer.village && (
+              <DetailItem
+                icon={<MapPinIcon />}
+                label="Village"
+                value={farmer.village}
+              />
+            )}
             <DetailItem
               icon={<LanguageIcon />}
               label="Preferred Language"
@@ -89,6 +96,23 @@ export function FarmerViewDrawer({ farmer, onClose }) {
               value={createdDate}
             />
           </div>
+
+          {/* Crops section */}
+          {farmer.crops && farmer.crops.length > 0 && (
+            <div className="fm-drawer-crops">
+              <div className="fm-detail-label" style={{ marginBottom: 8, fontWeight: 600 }}>
+                Crops ({farmer.crops.length})
+              </div>
+              <div className="fm-crops-list">
+                {farmer.crops.map((crop, i) => (
+                  <div key={i} className="fm-crop-tag">
+                    <span className="fm-crop-name">{crop.name}</span>
+                    <span className="fm-crop-meta">{crop.area} ac · {crop.season || '—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </aside>
     </>

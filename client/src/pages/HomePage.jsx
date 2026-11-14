@@ -22,7 +22,7 @@ export function HomePage() {
         <button
           id="admin-portal-card"
           className="portal-card portal-card--admin"
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate('/login')}
           type="button"
         >
           <div className="portal-icon">{icons.settings}</div>
@@ -31,7 +31,7 @@ export function HomePage() {
             Manage farmers, monitor drone ops, and analyze crop data across the platform.
           </p>
           <span className="portal-arrow">
-            Continue
+            Sign In
             {icons.arrow}
           </span>
         </button>
@@ -40,7 +40,7 @@ export function HomePage() {
         <button
           id="farmer-portal-card"
           className="portal-card portal-card--farmer"
-          onClick={() => navigate('/farmer')}
+          onClick={() => navigate('/login')}
           type="button"
         >
           <div className="portal-icon">{icons.farmer}</div>
@@ -49,7 +49,7 @@ export function HomePage() {
             Access soil data, weather insights, pest alerts, and your AI farming assistant.
           </p>
           <span className="portal-arrow">
-            Continue
+            Sign In
             {icons.arrow}
           </span>
         </button>

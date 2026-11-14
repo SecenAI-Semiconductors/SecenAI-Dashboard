@@ -70,7 +70,7 @@ export function PriceTrendChart({ chartData }) {
         <h2 className="mi-section-title">Price Trend</h2>
       </div>
       <p className="mi-section-subtitle">
-        Modal price movement over time across available markets.
+        Day-to-day modal price movement — today's price is live from AGMARKNET; prior 6 days are estimated trend (±2% drift).
       </p>
 
       <div className="ptc-card">
@@ -97,7 +97,7 @@ export function PriceTrendChart({ chartData }) {
             <div className="ptc-empty">
               <div className="ptc-empty-icon">📊</div>
               <span className="ptc-empty-text">
-                No price trend data available for this period.
+                No price data available. Try searching a different commodity.
               </span>
             </div>
           ) : (

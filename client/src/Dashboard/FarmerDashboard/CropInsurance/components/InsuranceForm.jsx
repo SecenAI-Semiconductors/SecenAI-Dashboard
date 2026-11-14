@@ -26,7 +26,6 @@ const INDIAN_STATES = [
 ]
 
 const INITIAL_FORM = {
-  farmerName: '',
   cropName: '',
   cropType: '',
   cropSeason: '',
@@ -41,17 +40,15 @@ const INITIAL_FORM = {
   requestedCoverage: '',
 }
 
-export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialData = null, onCancelEdit }) {
+export function InsuranceForm({ onSubmit, isSubmitting, initialData = null, onCancelEdit }) {
   const [form, setForm] = useState(INITIAL_FORM)
   const [errors, setErrors] = useState({})
-  const [selectedFarmerId, setSelectedFarmerId] = useState('')
 
   // Populate form if editing
   import('react').then(React => {
     React.useEffect(() => {
       if (initialData) {
         setForm({
-          farmerName: initialData.farmerName || '',
           cropName: initialData.cropName || '',
           cropType: initialData.cropType || '',
           cropSeason: initialData.cropSeason || '',
@@ -65,10 +62,8 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialDat
           estimatedYield: initialData.estimatedYield || '',
           requestedCoverage: initialData.requestedCoverage || '',
         });
-        setSelectedFarmerId(initialData.farmerId || '');
       } else {
         setForm(INITIAL_FORM);
-        setSelectedFarmerId('');
       }
     }, [initialData]);
   });
@@ -93,33 +88,11 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialDat
     }
   }
 
-  function handleFarmerSelect(e) {
-    const farmerId = e.target.value
-    setSelectedFarmerId(farmerId)
-
-    if (farmerId) {
-      const farmer = farmers.find((f) => f._id === farmerId)
-      if (farmer) {
-        setForm((prev) => ({
-          ...prev,
-          farmerName: farmer.fullName || '',
-          district: farmer.district || prev.district,
-          state: farmer.state || prev.state,
-        }))
-      }
-    } else {
-      setForm((prev) => ({
-        ...prev,
-        farmerName: '',
-      }))
-    }
-  }
+  function handleFarmerSelect() {}  // removed — farmerId comes from JWT
 
   function validate() {
     const newErrors = {}
 
-    if (!selectedFarmerId) newErrors.farmerId = 'Please select a farmer'
-    if (!form.farmerName.trim()) newErrors.farmerName = 'Farmer name is required'
     if (!form.cropName.trim()) newErrors.cropName = 'Crop name is required'
     if (!form.cropType) newErrors.cropType = 'Select a crop type'
     if (!form.cropSeason) newErrors.cropSeason = 'Select a crop season'
@@ -151,8 +124,6 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialDat
     if (!validate()) return
 
     const payload = {
-      farmerId: selectedFarmerId,
-      farmerName: form.farmerName.trim(),
       cropName: form.cropName.trim(),
       cropType: form.cropType,
       cropSeason: form.cropSeason,
@@ -172,7 +143,6 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialDat
 
     if (success) {
       setForm(INITIAL_FORM)
-      setSelectedFarmerId('')
       setErrors({})
     }
   }
@@ -195,41 +165,6 @@ export function InsuranceForm({ onSubmit, isSubmitting, farmers = [], initialDat
         {/* ── Form Card ── */}
         <form className="ci-form-card" onSubmit={handleSubmit} id="insurance-application-form">
           <div className="ci-form-accent-bar" />
-
-          {/* Farmer Selection */}
-          <div className="ci-form-group ci-form-group--full">
-            <label className="ci-form-label">Select Farmer *</label>
-            <select
-              className={`ci-form-select${errors.farmerId ? ' ci-form-input--error' : ''}`}
-              value={selectedFarmerId}
-              onChange={handleFarmerSelect}
-              id="ci-farmer-select"
-            >
-              <option value="">— Choose a farmer —</option>
-              {farmers.map((f) => (
-                <option key={f._id} value={f._id}>
-                  {f.fullName} — {f.district || 'N/A'}, {f.state || 'N/A'}
-                </option>
-              ))}
-            </select>
-            {errors.farmerId && <span className="ci-form-error">{errors.farmerId}</span>}
-          </div>
-
-          {/* Farmer Name (auto-filled) */}
-          <div className="ci-form-group">
-            <label className="ci-form-label">Farmer Name *</label>
-            <input
-              type="text"
-              className={`ci-form-input${errors.farmerName ? ' ci-form-input--error' : ''}`}
-              name="farmerName"
-              value={form.farmerName}
-              onChange={handleChange}
-              placeholder="Auto-filled from selection"
-              readOnly={!!selectedFarmerId}
-              id="ci-farmer-name"
-            />
-            {errors.farmerName && <span className="ci-form-error">{errors.farmerName}</span>}
-          </div>
 
           {/* Crop Name */}
           <div className="ci-form-group">

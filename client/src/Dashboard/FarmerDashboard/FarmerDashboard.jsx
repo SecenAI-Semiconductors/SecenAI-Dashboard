@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { icons } from '../../components/ui/icons'
+import { useAuth } from '../../context/AuthContext'
 
 const farmerFeatures = [
   {
@@ -48,15 +50,34 @@ const farmerFeatures = [
 
 export function FarmerDashboard() {
   const navigate = useNavigate()
+  const { user, loading } = useAuth()
+
+  // Redirect to complete-profile only when auth has fully loaded AND the farmer
+  // has never set up their profile at all (no land area AND no crops).
+  // Having crops OR a non-zero land area means the profile is set up — don't interrupt.
+  useEffect(() => {
+    if (loading) return   // wait for session-restore to finish
+
+    const hasLand  = user?.totalLandArea && user.totalLandArea > 0
+    const hasCrops = user?.crops && user.crops.length > 0
+    const skipped  = sessionStorage.getItem('profile_skipped')
+
+    if (user && user.role === 'farmer' && !hasLand && !hasCrops && !skipped) {
+      navigate('/complete-profile', { replace: true })
+    }
+  }, [user, loading, navigate])
 
   return (
     <div className="dashboard-view" id="farmer-dashboard">
       {/* Content */}
       <section className="dashboard-content">
-        <h1 className="dashboard-heading">Your Farm Tools</h1>
-        <p className="dashboard-subheading">
-          Everything you need to manage your farm efficiently.
-        </p>
+        {/* Header */}
+        <div>
+          <h1 className="dashboard-heading">Your Farm Tools</h1>
+          <p className="dashboard-subheading">
+            {user?.name ? `Welcome, ${user.name}. ` : ''}Everything you need to manage your farm efficiently.
+          </p>
+        </div>
 
         <div className="feature-cards">
           {farmerFeatures.map((f) => (
@@ -72,7 +93,7 @@ export function FarmerDashboard() {
               <span className="feature-card-desc">{f.desc}</span>
               {f.route && (
                 <span className="feature-card-arrow">
-                  View Analysis →
+                  View Analysis &rarr;
                 </span>
               )}
             </div>

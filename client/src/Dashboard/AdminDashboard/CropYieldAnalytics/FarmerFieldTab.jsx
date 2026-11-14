@@ -62,7 +62,7 @@ export function FarmerFieldTab({ data, allData }) {
   const drawerRecords = useMemo(() => {
     if (!drawerFarmerId) return []
     return allData.filter(r => r.farmerId === drawerFarmerId)
-      .sort((a, b) => a.season.localeCompare(b.season) || a.plotName.localeCompare(b.plotName))
+      .sort((a, b) => (a.season || '').localeCompare(b.season || '') || a.plotName.localeCompare(b.plotName))
   }, [drawerFarmerId, allData])
 
   const drawerFarmerName = drawerRecords[0]?.farmerName || ''
@@ -108,7 +108,7 @@ export function FarmerFieldTab({ data, allData }) {
                   <td>{r.district}</td>
                   <td>{r.crop}</td>
                   <td>{formatNumber(r.area, 1)}</td>
-                  <td>{r.expectedYield.toFixed(2)}</td>
+                  <td>{r.expectedYield != null ? r.expectedYield.toFixed(2) : '—'}</td>
                   <td>{r.actualYield != null ? r.actualYield.toFixed(2) : '—'}</td>
                   <td>{r.yieldPerAcre != null ? r.yieldPerAcre.toFixed(2) : '—'}</td>
                   <td>{r.variancePct != null ? formatPercent(r.variancePct) : '—'}</td>
@@ -155,7 +155,7 @@ export function FarmerFieldTab({ data, allData }) {
                     </div>
                     <div className="cya-detail-field">
                       <span className="cya-detail-label">Expected Yield</span>
-                      <span className="cya-detail-value">{r.expectedYield.toFixed(2)} t/ac</span>
+                      <span className="cya-detail-value">{r.expectedYield != null ? `${r.expectedYield.toFixed(2)} t/ac` : '—'}</span>
                     </div>
                     <div className="cya-detail-field">
                       <span className="cya-detail-label">{r.isProjected ? 'Forecast Yield' : 'Actual Yield'}</span>

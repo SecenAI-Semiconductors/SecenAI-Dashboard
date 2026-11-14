@@ -72,6 +72,11 @@ const droneOperationSchema = new mongoose.Schema(
     duration:       { type: String, default: "—" },
     coverage:       { type: String, default: "—" },
     summary:        { type: String, default: "" },
+
+    // ── farmer reference (on flight + missionLog docTypes) ─────────
+    farmerId:       { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    farmerName:     { type: String, default: null },
+
     alerts: [
       {
         level:   { type: String, enum: ["error", "warning", "info"] },

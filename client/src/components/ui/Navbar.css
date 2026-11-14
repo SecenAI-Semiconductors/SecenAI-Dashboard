@@ -75,6 +75,20 @@
   background: var(--accent-green-soft);
 }
 
+.navbar-settings-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.navbar-settings-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* ===== Responsive ===== */
 
 @media (max-width: 640px) {
