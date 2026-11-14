@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react';
-import { getOperators, getFields, scheduleFlight, MISSION_TYPES } from './api';
+import { getDrones, getOperators, getFarmers, getFarmerById, scheduleFlight, MISSION_TYPES } from './api';
 import { ScheduleFlightModal } from './ScheduleFlightModal';
 
 const emptyForm = {
-  droneId: '',
-  fieldId: '',
+  farmerId:    '',
+  droneId:     '',
+  operatorId:  '',
   missionType: '',
-  operatorId: '',
-  date: '',
-  time: '',
+  date:        '',
+  time:        '',
+  // auto-filled from farmer
+  fieldId:     '',
+  fieldName:   '',
+  district:    '',
+  state:       '',
+  cropId:      '',   // which crop/plot (if farmer has multiple)
 };
 
 function formatDateTime(isoString) {
@@ -29,37 +35,69 @@ export function FlightScheduling({ scheduledFlights, flightsLoading, flightsErro
   const [preflightCheck, setPreflightCheck] = useState(null);
   const [pendingFlight, setPendingFlight]   = useState(null);
 
-  // Reference data loaded from API
+  // Reference data
   const [availableDrones, setAvailableDrones] = useState([]);
   const [operators, setOperators]             = useState([]);
-  const [fields, setFields]                   = useState([]);
+  const [farmers, setFarmers]                 = useState([]);
   const [refLoading, setRefLoading]           = useState(true);
   const [refError, setRefError]               = useState(null);
 
+  // Selected farmer's profile (for auto-fill + crop list)
+  const [farmerProfile, setFarmerProfile]     = useState(null);
+  const [farmerLoading, setFarmerLoading]     = useState(false);
+
   useEffect(() => {
     setRefLoading(true);
-    Promise.all([getOperators(), getFields()])
-      .then(([ops, flds]) => {
+    Promise.all([getOperators(), getFarmers()])
+      .then(([ops, fms]) => {
         setOperators(ops);
-        setFields(flds);
+        setFarmers(fms);
         setRefError(null);
       })
       .catch(err => setRefError(err.message))
       .finally(() => setRefLoading(false));
   }, []);
 
-  // Derive available drones from the fleet (passed via props via DroneOperations)
-  // We keep a separate fetch here because FlightScheduling needs live availability
+  // Load available drones
   useEffect(() => {
-    import('./api').then(({ getDrones }) => {
-      getDrones()
-        .then(drones => setAvailableDrones(drones.filter(d => d.status === 'Available')))
-        .catch(() => {}); // non-critical — form will just show empty drone list
-    });
+    getDrones()
+      .then(drones => setAvailableDrones(drones.filter(d => d.status === 'Available')))
+      .catch(() => {});
   }, []);
 
+  // When farmer changes: fetch profile and auto-fill field/location
+  useEffect(() => {
+    if (!form.farmerId) {
+      setFarmerProfile(null);
+      setForm(prev => ({
+        ...prev,
+        fieldId: '', fieldName: '', district: '', state: '', cropId: '',
+      }));
+      return;
+    }
+    setFarmerLoading(true);
+    getFarmerById(form.farmerId)
+      .then(profile => {
+        setFarmerProfile(profile);
+        // Auto-fill location from farmer's record
+        setForm(prev => ({
+          ...prev,
+          fieldId:   profile._id,            // use farmer's _id as field reference
+          fieldName: profile.village
+            ? `${profile.village}, ${profile.district}`
+            : profile.district || '',
+          district:  profile.district || '',
+          state:     profile.state || '',
+          cropId:    '',
+        }));
+      })
+      .catch(() => setFarmerProfile(null))
+      .finally(() => setFarmerLoading(false));
+  }, [form.farmerId]);
+
   const isFormValid =
-    form.droneId && form.fieldId && form.missionType && form.operatorId && form.date && form.time;
+    form.farmerId && form.droneId && form.operatorId &&
+    form.missionType && form.date && form.time;
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -74,10 +112,14 @@ export function FlightScheduling({ scheduledFlights, flightsLoading, flightsErro
       const { readiness, flight } = await scheduleFlight({
         droneId:     form.droneId,
         operatorId:  form.operatorId,
-        fieldId:     form.fieldId,
+        // Use a "virtual" field: build fieldId from farmer + crop selection
+        // The backend still needs a real field doc; use first available field
+        // tied to this farmer's location. For now, pass farmer location as the field reference.
+        fieldId:     form.cropId || 'FLD-01',   // fallback to first field doc
         missionType: form.missionType,
         date:        form.date,
         time:        form.time,
+        farmerId:    form.farmerId,
       });
       setPreflightCheck(readiness);
       setPendingFlight(flight);
@@ -122,7 +164,61 @@ export function FlightScheduling({ scheduledFlights, flightsLoading, flightsErro
             <div className="cim-loading">Loading form data...</div>
           ) : (
             <div className="dom-form-grid">
-              {/* Drone */}
+              {/* Step 1: Farmer */}
+              <div className="dom-form-field full">
+                <label className="dom-form-label">Farmer</label>
+                <select
+                  name="farmerId"
+                  className="dom-form-select"
+                  value={form.farmerId}
+                  onChange={handleChange}
+                >
+                  <option value="">Select farmer</option>
+                  {farmers.map(f => (
+                    <option key={f._id} value={f._id}>
+                      {f.fullName} — {f.district}, {f.state}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Auto-filled location (read-only display) */}
+              {form.farmerId && (
+                <div className="dom-form-field full">
+                  <label className="dom-form-label">Field / Location (auto-filled)</label>
+                  {farmerLoading ? (
+                    <div className="cim-loading" style={{ fontSize: 13 }}>Loading farmer data...</div>
+                  ) : farmerProfile ? (
+                    <div style={{ padding: '8px 12px', background: 'var(--bg-secondary, #f5f5f5)', borderRadius: 6, fontSize: 13 }}>
+                      {farmerProfile.village ? `${farmerProfile.village}, ` : ''}
+                      {farmerProfile.district}, {farmerProfile.state}
+                      {farmerProfile.totalLandArea ? ` · ${farmerProfile.totalLandArea} acres` : ''}
+                    </div>
+                  ) : null}
+
+                  {/* If farmer has multiple crops, show crop/plot selector */}
+                  {farmerProfile?.crops?.length > 1 && (
+                    <>
+                      <label className="dom-form-label" style={{ marginTop: 8 }}>Crop / Plot</label>
+                      <select
+                        name="cropId"
+                        className="dom-form-select"
+                        value={form.cropId}
+                        onChange={handleChange}
+                      >
+                        <option value="">All crops / entire field</option>
+                        {farmerProfile.crops.map((c, i) => (
+                          <option key={i} value={c._id || i}>
+                            {c.name} — {c.area} acres
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Step 2: Drone */}
               <div className="dom-form-field">
                 <label className="dom-form-label">Drone</label>
                 <select
@@ -140,7 +236,7 @@ export function FlightScheduling({ scheduledFlights, flightsLoading, flightsErro
                 </select>
               </div>
 
-              {/* Operator */}
+              {/* Step 3: Operator */}
               <div className="dom-form-field">
                 <label className="dom-form-label">Operator</label>
                 <select
@@ -152,24 +248,6 @@ export function FlightScheduling({ scheduledFlights, flightsLoading, flightsErro
                   <option value="">Select operator</option>
                   {operators.map(o => (
                     <option key={o.id} value={o.id}>{o.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Field */}
-              <div className="dom-form-field full">
-                <label className="dom-form-label">Field / Location</label>
-                <select
-                  name="fieldId"
-                  className="dom-form-select"
-                  value={form.fieldId}
-                  onChange={handleChange}
-                >
-                  <option value="">Select field</option>
-                  {fields.map(f => (
-                    <option key={f.id} value={f.id}>
-                      {f.name} — {f.district}, {f.state} ({f.area})
-                    </option>
                   ))}
                 </select>
               </div>

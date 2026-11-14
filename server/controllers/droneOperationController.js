@@ -1,4 +1,5 @@
 const DroneOperation = require("../models/DroneOperation");
+const User = require("../models/User");
 
 // ════════════════════════════════════════════════════════════════════
 //  HELPER — Pre-flight readiness check
@@ -82,6 +83,8 @@ function formatMission(m) {
     coverage:     m.coverage,
     summary:      m.summary,
     alerts:       m.alerts || [],
+    farmerId:     m.farmerId || null,
+    farmerName:   m.farmerName || "Unassigned",
   };
 }
 
@@ -185,9 +188,24 @@ exports.getFlights = async (req, res) => {
 
 exports.createFlight = async (req, res) => {
   try {
-    const { droneId, operatorId, fieldId, missionType, date, time } = req.body;
+    const { droneId, operatorId, fieldId, missionType, date, time, farmerId } = req.body;
     if (!droneId || !operatorId || !fieldId || !missionType || !date || !time) {
       return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // Validate farmer if provided
+    let farmerName = null;
+    let resolvedFarmerId = null;
+    if (farmerId) {
+      const farmer = await User.findById(farmerId).select("fullName role").lean();
+      if (!farmer) {
+        return res.status(400).json({ message: `Farmer ${farmerId} not found.` });
+      }
+      if (farmer.role !== "farmer") {
+        return res.status(400).json({ message: `User ${farmerId} is not a farmer.` });
+      }
+      farmerName = farmer.fullName;
+      resolvedFarmerId = farmer._id;
     }
 
     // Load referenced records from the same collection
@@ -221,6 +239,8 @@ exports.createFlight = async (req, res) => {
       missionType,
       scheduledAt,
       status:       "Scheduled",
+      farmerId:     resolvedFarmerId,
+      farmerName,
     });
 
     res.status(201).json({ readiness, flight: formatFlight(flight) });
@@ -269,6 +289,65 @@ exports.getMissionById = async (req, res) => {
       return res.status(404).json({ message: `Mission ${req.params.id} not found.` });
     }
     res.status(200).json(formatMission(doc));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════
+//  FARMER LOOKUP   —   GET /api/admin/drone/farmer/:farmerId
+//  Used by FlightScheduling UI to auto-fill field/location from
+//  the selected farmer's real profile record.
+// ════════════════════════════════════════════════════════════════════
+exports.getFarmerForDrone = async (req, res) => {
+  try {
+    const farmer = await User.findById(req.params.farmerId)
+      .select("fullName phone village district state totalLandArea crops role")
+      .lean();
+
+    if (!farmer) {
+      return res.status(404).json({ message: "Farmer not found." });
+    }
+    if (farmer.role !== "farmer") {
+      return res.status(400).json({ message: "User is not a farmer." });
+    }
+
+    res.status(200).json({
+      _id:          farmer._id,
+      fullName:     farmer.fullName,
+      phone:        farmer.phone,
+      village:      farmer.village || null,
+      district:     farmer.district || null,
+      state:        farmer.state || null,
+      totalLandArea: farmer.totalLandArea || null,
+      crops:        farmer.crops || [],
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ════════════════════════════════════════════════════════════════════
+//  FARMERS LIST   —   GET /api/admin/drone/farmers
+//  Returns all farmers (id, name, district, state) for the picker.
+// ════════════════════════════════════════════════════════════════════
+exports.getFarmersForDrone = async (req, res) => {
+  try {
+    const farmers = await User.find({ role: "farmer" })
+      .select("fullName phone village district state")
+      .sort({ fullName: 1 })
+      .lean();
+
+    res.status(200).json(
+      farmers.map((f) => ({
+        _id:      f._id,
+        fullName: f.fullName,
+        phone:    f.phone,
+        village:  f.village || null,
+        district: f.district || null,
+        state:    f.state || null,
+      }))
+    );
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

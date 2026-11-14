@@ -1,0 +1,196 @@
+/**
+ * SettingsPage.css
+ *
+ * Layout tokens for FarmerSettingsPage and AdminSettingsPage.
+ * Reuses all auth-* class tokens from AuthPages.css.
+ * No new colour palette introduced.
+ */
+
+.settings-page {
+  min-height: calc(100vh - 56px); /* subtract navbar height */
+  background: var(--bg-primary);
+  padding: 32px 16px 64px;
+  display: flex;
+  justify-content: center;
+}
+
+.settings-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* ── Header ── */
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.settings-header-left { flex: 1; }
+
+.settings-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.settings-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ── Sections ── */
+.settings-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+}
+
+.settings-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-subsection-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 24px 0 16px;
+}
+
+/* ── Save button ── */
+.settings-save-btn {
+  margin-top: 20px;
+  max-width: 200px;
+}
+
+/* ── Read-only phone field ── */
+.settings-readonly-field {
+  margin-bottom: 20px;
+}
+
+.settings-readonly-value {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.settings-readonly-note {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Crop rows ── */
+.settings-crops-section {
+  margin: 20px 0;
+}
+
+.settings-crops-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.settings-add-crop-btn {
+  background: none;
+  border: 1px solid var(--accent-green);
+  color: var(--accent-green);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.settings-add-crop-btn:hover:not(:disabled) {
+  background: var(--accent-green-soft);
+}
+
+.settings-add-crop-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-crop-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.settings-crop-name  { min-width: 0; }
+.settings-crop-area  { min-width: 0; }
+.settings-crop-season{ min-width: 0; }
+
+.settings-remove-crop-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.settings-remove-crop-btn:hover:not(:disabled) {
+  color: #dc2626;
+}
+
+@media (max-width: 540px) {
+  .settings-crop-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+  .settings-crop-name   { grid-column: 1 / -1; }
+  .settings-remove-crop-btn { justify-self: end; }
+}
+
+/* ── Sign out section ── */
+.settings-section--danger {
+  border-color: rgba(220, 38, 38, 0.2);
+}
+
+.settings-signout-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.settings-signout-btn {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #c0392b;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.settings-signout-btn:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+

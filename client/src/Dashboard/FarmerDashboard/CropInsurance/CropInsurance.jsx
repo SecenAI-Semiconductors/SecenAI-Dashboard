@@ -11,7 +11,7 @@
  *   3. My Insurance Requests (submitted applications)
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useInsurance } from './hooks/useInsurance'
 import { InsuranceOverview } from './components/InsuranceOverview'
 import { InsuranceForm } from './components/InsuranceForm'
@@ -24,16 +24,11 @@ import {
 } from './components/LoadingSkeleton'
 import { submitInsurance, updateInsurance, deleteInsurance } from './services/insuranceApi'
 import { useToast, ToastContainer } from '../../AdminDashboard/FarmerManagement/Toast'
-import farmerService from '../../../services/farmerService'
 import './CropInsurance.css'
 
 export function CropInsurance() {
   const { requests, stats, loading, error, refetch } = useInsurance()
   const { toasts, showToast, dismissToast } = useToast()
-
-  // ── Farmers list for the form dropdown ──
-  const [farmers, setFarmers] = useState([])
-  const [farmersLoading, setFarmersLoading] = useState(true)
 
   // ── Detail drawer state ──
   const [viewRequest, setViewRequest] = useState(null)
@@ -43,27 +38,6 @@ export function CropInsurance() {
 
   // ── Submission state ──
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  // ── Fetch farmers for form dropdown ──
-  const fetchFarmers = useCallback(async () => {
-    try {
-      setFarmersLoading(true)
-      const data = await farmerService.getAll()
-      setFarmers(data)
-    } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to load farmers'
-      showToast(message, 'error')
-    } finally {
-      setFarmersLoading(false)
-    }
-  }, [showToast])
-
-  useEffect(() => {
-    fetchFarmers()
-  }, [fetchFarmers])
 
   // ── Submit insurance application ──
   async function handleSubmit(formData) {
@@ -109,7 +83,7 @@ export function CropInsurance() {
     }
   }
 
-  const isPageLoading = loading || farmersLoading
+  const isPageLoading = loading
 
   return (
     <div className="ci-page" id="crop-insurance-page">
@@ -163,7 +137,6 @@ export function CropInsurance() {
             <InsuranceForm
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
-              farmers={farmers}
               initialData={editRequest}
               onCancelEdit={() => setEditRequest(null)}
             />

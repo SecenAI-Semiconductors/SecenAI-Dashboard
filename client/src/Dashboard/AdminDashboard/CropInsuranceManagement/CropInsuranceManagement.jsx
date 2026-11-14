@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import api from '../../../services/api';
 import './CropInsuranceManagement.css';
 import { InsuranceTable } from './InsuranceTable';
 import { AdminInsuranceDrawer } from './AdminInsuranceDrawer';
@@ -22,17 +23,10 @@ export function CropInsuranceManagement() {
   const fetchApplications = async () => {
     setIsLoading(true);
     try {
-      const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-      const res = await fetch(`${baseUrl}/api/insurance`, {
-        headers: {
-          'x-api-key': import.meta.env.VITE_API_SECRET_KEY || ''
-        }
-      });
-      if (!res.ok) throw new Error('Failed to fetch insurance applications');
-      const data = await res.json();
-      setApplications(data);
-    } catch (err) { 
-      setError(err.message);
+      const res = await api.get('/api/admin/insurance');
+      setApplications(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to fetch insurance applications');
     } finally {
       setIsLoading(false);
     }
@@ -93,18 +87,7 @@ export function CropInsuranceManagement() {
     if (!selectedApp) return;
     
     try {
-      const baseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
-      const url = `${baseUrl}/api/insurance/${selectedApp._id}/${type}`;
-      const res = await fetch(url, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'x-api-key': import.meta.env.VITE_API_SECRET_KEY || ''
-        },
-        body: JSON.stringify({ adminRemarks: remarks })
-      });
-
-      if (!res.ok) throw new Error('Action failed');
+      await api.patch(`/api/admin/insurance/${selectedApp._id}/${type}`, { adminRemarks: remarks });
       
       // Refresh data
       await fetchApplications();

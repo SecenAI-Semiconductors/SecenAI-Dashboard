@@ -11,6 +11,11 @@ connectDB();
 
 const app = express();
 
+// Trust the first proxy hop (Vercel / reverse proxies) so that
+// req.ip resolves to the real client IP via X-Forwarded-For,
+// rather than the proxy's IP (which would make every user share one rate-limit bucket).
+app.set("trust proxy", 1);
+
 /* ── Allowed frontend origins ── */
 const allowedOrigins = [
   process.env.CLIENT_URL,       // Production frontend URL (set in Vercel env vars)
@@ -95,11 +100,32 @@ app.get("/debug", (req, res) => {
   });
 });
 
+// ── Authentication (public + JWT-protected) ──────────────────────────────────
+app.use("/api/auth", require("./routes/authRoutes"));
+
+// ── Farmer self-service profile + insurance (JWT + farmer role required) ──────
+app.use("/api/farmer", require("./routes/farmerRoutes"));
+
+// ── Admin farmer management (JWT + admin role required) ──────────────────────
+app.use("/api/admin/farmers", require("./routes/adminFarmerRoutes"));
+
+// ── Admin self-service profile (JWT + admin role required) ────────────────────
+app.use("/api/admin/me", require("./routes/adminMeRoutes"));
+
+// ── Admin insurance management (JWT + admin role required) ───────────────────
+app.use("/api/admin/insurance", require("./routes/adminInsuranceRoutes"));
+
+// ── Admin analytics (JWT + admin role required) ───────────────────────────────
+app.use("/api/admin/analytics", require("./routes/adminAnalyticsRoutes"));
+
 app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/insurance", require("./routes/insuranceRoutes"));
 app.use("/api/weather", require("./routes/weatherRoutes"));
 app.use("/api/ai-assistant", require("./routes/aiAssistantRoutes"));
 app.use("/api/soil", require("./routes/soilRoutes"));
+
+// ── Market price proxy (server-side → data.gov.in, no CORS) ─────────────────
+// Must be mounted BEFORE the drone catch-all (/api) to avoid its auth guard.
+app.use("/api/market", require("./routes/marketProxyRoutes"));
 
 // ── Drone Operations (single consolidated router) ────────────────────────────
 app.use("/api", require("./routes/droneOperationRoutes"));

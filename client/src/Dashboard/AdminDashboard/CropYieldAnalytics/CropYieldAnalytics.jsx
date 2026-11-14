@@ -9,13 +9,13 @@
  * Farmer selection auto-sets district; clearing farmer resets auto-set district.
  */
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, Component } from 'react'
 import {
   ResponsiveContainer, BarChart, Bar, LineChart, Line,
   PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from 'recharts'
 import './CropYieldAnalytics.css'
-import { getFarmers, getYieldData, applyFilters, getFilterOptions, computeYieldGrowth, reconcileCheck, CROPS, SEASONS } from './api'
+import { getFarmers, getYieldData, getAnalytics, applyFilters, getFilterOptions, computeYieldGrowth, reconcileCheck, resetCache, CROPS, SEASONS } from './api'
 import { CHART_COLORS, formatNumber, formatArea, formatYield, formatPercent, REFERENCE_DATE } from './utils'
 import { CropPerformanceTab } from './CropPerformanceTab'
 import { FarmerFieldTab } from './FarmerFieldTab'
@@ -28,9 +28,39 @@ const TABS = [
   { id: 'forecast', label: 'Harvest Forecast' },
 ]
 
+/** Error boundary — prevents one crashed tab from blanking the whole page. */
+class TabErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, error: null }
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error }
+  }
+  componentDidCatch(error, info) {
+    console.error('[CropYieldAnalytics] Tab error:', error, info)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="cya-empty" style={{ color: 'var(--text-danger, #dc2626)' }}>
+          <div className="cya-empty-icon">⚠️</div>
+          <h3>This tab encountered an error</h3>
+          <p style={{ fontSize: 13, fontFamily: 'monospace' }}>{this.state.error?.message}</p>
+          <button className="cya-reset-btn" onClick={() => this.setState({ hasError: false, error: null })}>
+            Retry
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 export function CropYieldAnalytics() {
   const [activeTab, setActiveTab] = useState('overview')
   const [allData, setAllData] = useState([])
+  const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // ── Filter state (single object) ──
@@ -39,34 +69,24 @@ export function CropYieldAnalytics() {
 
   const loggedRef = useRef(false)
 
-  // ── Load once ──
+  // ── Load once per mount (always fresh — farmer profiles may have changed) ──
   const loadData = useCallback(async () => {
+    resetCache()   // bust the module-level cache so we always fetch latest data
     setLoading(true)
     try {
-      const { farmers: f, source } = await getFarmers()
-      const data = await getYieldData()
+      const [data, analyticsData] = await Promise.all([getYieldData(), getAnalytics()])
       setAllData(data)
+      setAnalytics(analyticsData)
 
       if (!loggedRef.current) {
         loggedRef.current = true
-        const seasonCounts = {}
-        const cropYields = {}
-        for (const r of data) {
-          seasonCounts[r.season] = (seasonCounts[r.season] || 0) + 1
-          if (!cropYields[r.crop]) cropYields[r.crop] = { min: Infinity, max: -Infinity }
-          const y = r.actualYield ?? r.forecastYield ?? r.expectedYield
-          if (y < cropYields[r.crop].min) cropYields[r.crop].min = +y.toFixed(3)
-          if (y > cropYields[r.crop].max) cropYields[r.crop].max = +y.toFixed(3)
-        }
-        console.info('[CropYieldAnalytics] Summary:', { source, farmerCount: f.length, recordsPerSeason: seasonCounts, yieldRangesPerCrop: cropYields })
-        // DEBUG: per-farmer record count
-        const perFarmer = {}
-        for (const r of data) {
-          if (!perFarmer[r.farmerId]) perFarmer[r.farmerId] = { name: r.farmerName, count: 0 }
-          perFarmer[r.farmerId].count++
-        }
-        console.info('[CropYieldAnalytics] Records per farmer:', perFarmer)
-        console.info('[CropYieldAnalytics] Farmers in records:', Object.keys(perFarmer).length, 'vs loaded:', f.length)
+        console.info('[CropYieldAnalytics] Real data loaded:', {
+          totalFarmers:      analyticsData.totalFarmers,
+          totalLand:         analyticsData.totalLand,
+          cropDistribution:  analyticsData.cropDistribution,
+          stateBreakdown:    analyticsData.stateBreakdown,
+          districtBreakdown: analyticsData.districtBreakdown,
+        })
       }
     } catch (err) {
       console.error('[CropYieldAnalytics] Load error:', err)
@@ -78,16 +98,9 @@ export function CropYieldAnalytics() {
   useEffect(() => { loadData() }, [loadData])
 
   // ── Dependent filter options ──
-  // When district was auto-set from a farmer, the farmer dropdown must still
-  // show ALL farmers (ignoring the auto-set district) so the user can switch.
-  const options = useMemo(() => {
-    const base = getFilterOptions(allData, filters)
-    if (districtAutoSet && filters.district) {
-      const { farmers } = getFilterOptions(allData, { ...filters, district: '' })
-      return { ...base, farmers }
-    }
-    return base
-  }, [allData, filters, districtAutoSet])
+  // Farmer list always comes from full allData (fix: selecting farmer A must
+  // not hide farmer B from the dropdown due to auto-set district).
+  const options = useMemo(() => getFilterOptions(allData, filters), [allData, filters])
 
   // ── Validate: if a current selection is no longer in its option list, reset it ──
   useEffect(() => {
@@ -204,14 +217,14 @@ export function CropYieldAnalytics() {
           </select>
         </div>
 
-        {loading ? <LoadingSkeleton /> : allData.length === 0 ? (
+        {loading ? <LoadingSkeleton /> : !analytics ? (
           <NoDataState />
         ) : (
           <>
-            {activeTab === 'overview'  && <OverviewTab data={filtered} allData={allData} filterSeason={filters.season} />}
-            {activeTab === 'crop'      && <CropPerformanceTab data={filtered} allData={allData} filterSeason={filters.season} />}
-            {activeTab === 'farmer'    && <FarmerFieldTab data={filtered} allData={allData} />}
-            {activeTab === 'forecast'  && <HarvestForecastTab data={filtered} />}
+            {activeTab === 'overview'  && <TabErrorBoundary key="overview"><OverviewTab data={filtered} allData={allData} analytics={analytics} filterSeason={filters.season} /></TabErrorBoundary>}
+            {activeTab === 'crop'      && <TabErrorBoundary key="crop"><CropPerformanceTab data={filtered} allData={allData} filterSeason={filters.season} /></TabErrorBoundary>}
+            {activeTab === 'farmer'    && <TabErrorBoundary key="farmer"><FarmerFieldTab data={filtered} allData={allData} /></TabErrorBoundary>}
+            {activeTab === 'forecast'  && <TabErrorBoundary key="forecast"><HarvestForecastTab data={filtered} /></TabErrorBoundary>}
           </>
         )}
       </section>
@@ -223,187 +236,147 @@ export function CropYieldAnalytics() {
    OVERVIEW TAB
    ═══════════════════════════════════════════════════════════════════════════ */
 
-function OverviewTab({ data, allData, filterSeason }) {
-  // ── Determine which season counts as "in-progress" ──
-  const activeSeason = useMemo(() => {
-    if (filterSeason) {
-      const s = SEASONS.find(s => s.name === filterSeason)
-      return s || SEASONS.find(s => s.status === 'in-progress')
-    }
-    return SEASONS.find(s => s.status === 'in-progress')
-  }, [filterSeason])
+function OverviewTab({ data, allData, analytics, filterSeason }) {
 
-  // ── KPIs ──
+  // ── KPIs — computed from filtered data, not the global analytics object ──
+  // This ensures selecting a farmer / crop / district updates every number.
   const kpis = useMemo(() => {
-    let totalArea = 0, expProd = 0, totalProd = 0, yieldSum = 0, yieldN = 0
-    let seasonArea = 0, seasonHarvestedArea = 0
+    if (!analytics) return { totalFarmers: 0, completeFarmers: 0, incompleteFarmers: 0, totalLand: 0 }
+    const distinctIds = new Set(data.map(r => r.farmerId))
+    const totalFarmers = distinctIds.size
+    // Sum totalLandArea from the farmer list (not crop areas) — crop areas are
+    // what's cultivated, totalLandArea is the declared land the farmer owns.
+    const farmerListFiltered = (analytics.farmerList || []).filter(f => distinctIds.has(String(f._id)))
+    const totalLand = +farmerListFiltered.reduce((s, f) => s + (f.totalLandArea || 0), 0).toFixed(1)
+    const incompleteFarmers = farmerListFiltered.filter(f => f.incomplete).length
+    const completeFarmers = totalFarmers - incompleteFarmers
+    return { totalFarmers, completeFarmers, incompleteFarmers, totalLand }
+  }, [analytics, data])
 
-    for (const r of data) {
-      totalArea += r.area
-      expProd += r.expectedYield * r.area
-      totalProd += r.production
-
-      if (r.stage === 'harvested') { yieldSum += r.yieldPerAcre; yieldN++ }
-
-      // Harvest completion: in-progress season only
-      if (activeSeason && (r.season === activeSeason.name || r.seasonId === activeSeason.id)) {
-        seasonArea += r.area
-        if (r.stage === 'harvested') seasonHarvestedArea += r.area
-      }
-    }
-
-    const harvestPct = seasonArea > 0 ? +(seasonHarvestedArea / seasonArea * 100).toFixed(1) : 0
-    const growthPct = computeYieldGrowth(allData, filterSeason)
-
-    return {
-      totalArea: +totalArea.toFixed(1),
-      expProd: +expProd.toFixed(1),
-      totalProd: +totalProd.toFixed(1),
-      avgYield: yieldN > 0 ? +(yieldSum / yieldN).toFixed(2) : null,
-      growthPct,
-      harvestPct,
-    }
-  }, [data, allData, activeSeason, filterSeason])
-
-  // ── Production Trend (harvested only) ──
-  const trendData = useMemo(() => {
-    const m = {}
-    for (const r of data) {
-      if (r.stage !== 'harvested') continue
-      if (!m[r.season]) m[r.season] = { season: r.season, expected: 0, actual: 0 }
-      m[r.season].expected += r.expectedYield * r.area
-      m[r.season].actual += r.actualYield * r.area
-    }
-    return SEASONS.map(s => {
-      const d = m[s.name]
-      return d ? { season: s.name, expected: +d.expected.toFixed(1), actual: +d.actual.toFixed(1) }
-               : { season: s.name, expected: 0, actual: 0 }
-    })
-  }, [data])
-
-  // ── Crop Distribution (area, all records) ──
+  // ── Crop Distribution — from filtered data ──
   const cropDistData = useMemo(() => {
-    const m = {}
-    for (const r of data) m[r.crop] = (m[r.crop] || 0) + r.area
-    return Object.entries(m).map(([name, value]) => ({ name, value: +value.toFixed(1) })).sort((a, b) => b.value - a.value)
+    const byCrop = {}
+    for (const r of data) byCrop[r.crop] = (byCrop[r.crop] || 0) + r.area
+    return Object.entries(byCrop)
+      .map(([name, value]) => ({ name, value: +value.toFixed(1) }))
+      .sort((a, b) => b.value - a.value)
   }, [data])
 
-  // ── Expected vs Actual % bar (harvested only) ──
-  const expVsActData = useMemo(() => {
-    const m = {}
-    for (const r of data) {
-      if (r.stage !== 'harvested') continue
-      if (!m[r.crop]) m[r.crop] = { crop: r.crop, exp: 0, act: 0 }
-      m[r.crop].exp += r.expectedYield * r.area
-      m[r.crop].act += r.actualYield * r.area
-    }
-    return Object.values(m).map(d => ({
-      crop: d.crop.replace(' (Paddy)', '').replace(' (Tur)', ''),
-      pct: d.exp > 0 ? +((d.act / d.exp) * 100).toFixed(1) : 0,
-    }))
+  // ── State breakdown — from filtered data ──
+  const stateData = useMemo(() => {
+    const byState = {}
+    for (const r of data) byState[r.state] = (byState[r.state] || 0) + r.area
+    return Object.entries(byState)
+      .map(([state, area]) => ({ state, area: +area.toFixed(1) }))
+      .sort((a, b) => b.area - a.area)
   }, [data])
 
-  // ── Harvest Completion progress bars (active season only) ──
-  const harvestProgress = useMemo(() => {
-    if (!activeSeason) return []
-    const m = {}
-    for (const r of data) {
-      if (r.season !== activeSeason.name && r.seasonId !== activeSeason.id) continue
-      if (!m[r.crop]) m[r.crop] = { crop: r.crop, total: 0, harvested: 0 }
-      m[r.crop].total += r.area
-      if (r.stage === 'harvested') m[r.crop].harvested += r.area
-    }
-    return Object.values(m)
-      .map(d => ({ ...d, pct: d.total > 0 ? +(d.harvested / d.total * 100).toFixed(0) : 0 }))
-      .sort((a, b) => b.pct - a.pct)
-  }, [data, activeSeason])
+  // ── District breakdown — from filtered data ──
+  const districtData = useMemo(() => {
+    const byDistrict = {}
+    for (const r of data) byDistrict[r.district] = (byDistrict[r.district] || 0) + r.area
+    return Object.entries(byDistrict)
+      .map(([district, area]) => ({ district, area: +area.toFixed(1) }))
+      .sort((a, b) => b.area - a.area)
+  }, [data])
 
   return (
     <>
       <div className="cya-stats-grid" id="cya-kpi-cards">
-        <StatCard title="Total Cultivated Area"  value={formatArea(kpis.totalArea)}                   icon="🌾" accent={CHART_COLORS.green} />
-        <StatCard title="Expected Production"    value={`${formatNumber(kpis.expProd, 1)} t`}         icon="📊" accent={CHART_COLORS.blue} />
-        <StatCard title="Total Production"       value={`${formatNumber(kpis.totalProd, 1)} t`}       icon="📦" accent={CHART_COLORS.teal} />
-        <StatCard title="Avg Yield / Acre"       value={kpis.avgYield != null ? formatYield(kpis.avgYield) : '—'} icon="📈" accent={CHART_COLORS.gold} />
-        <StatCard title="Yield Growth %"         value={kpis.growthPct != null ? formatPercent(kpis.growthPct) : '—'} icon="🔄" accent={CHART_COLORS.purple} />
-        <StatCard title="Harvest Completion"     value={`${kpis.harvestPct}%`}                        icon="✅" accent={CHART_COLORS.greenDark} />
+        <StatCard title="Total Farmers"       value={kpis.totalFarmers}      icon="👨‍🌾" accent={CHART_COLORS.green} />
+        <StatCard title="Complete Profiles"   value={kpis.completeFarmers}   icon="✅"   accent={CHART_COLORS.blue} />
+        <StatCard title="Incomplete Profiles" value={kpis.incompleteFarmers} icon="⚠️"  accent={CHART_COLORS.gold} />
+        <StatCard title="Total Land (acres)"  value={kpis.totalLand != null ? `${kpis.totalLand} ac` : '—'} icon="🌾" accent={CHART_COLORS.teal} />
+        <StatCard title="Distinct Crops"      value={cropDistData.length}    icon="🌱"  accent={CHART_COLORS.purple} />
+        <StatCard title="Avg Land / Farmer"   value={kpis.completeFarmers > 0 ? `${+(kpis.totalLand / kpis.completeFarmers).toFixed(1)} ac` : '—'} icon="📐" accent={CHART_COLORS.greenDark} />
       </div>
 
       <div className="cya-charts-row">
-        {/* Production Trend */}
-        <div className="cya-card">
-          <h3 className="cya-section-title">Production Trend</h3>
-          <p className="cya-section-subtitle">Expected vs actual production by season (harvested only)</p>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={trendData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-              <XAxis dataKey="season" tick={{ fontSize: 11, fill: CHART_COLORS.axis }} axisLine={{ stroke: CHART_COLORS.axisLine }} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.axis }} axisLine={false} tickLine={false} tickFormatter={v => `${v}t`} width={60} />
-              <Tooltip content={<CyaTooltip unit="t" />} />
-              <Line type="monotone" dataKey="expected" stroke={CHART_COLORS.blue} strokeWidth={2} dot={{ r: 4 }} name="Expected" />
-              <Line type="monotone" dataKey="actual" stroke={CHART_COLORS.green} strokeWidth={2.5} dot={{ r: 4, fill: CHART_COLORS.green }} name="Actual" />
-              <Legend />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Crop Distribution */}
+        {/* Crop Distribution Pie */}
         <div className="cya-card">
           <h3 className="cya-section-title">Crop Distribution</h3>
-          <p className="cya-section-subtitle">Area under cultivation by crop (acres)</p>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie data={cropDistData} cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={2} dataKey="value" nameKey="name">
-                {cropDistData.map((_, i) => <Cell key={i} fill={CHART_COLORS.series[i % CHART_COLORS.series.length]} />)}
-              </Pie>
-              <Tooltip content={<CyaTooltip unit="acres" />} />
-              <Legend iconType="circle" iconSize={8} formatter={v => <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{v}</span>} />
-            </PieChart>
-          </ResponsiveContainer>
+          <p className="cya-section-subtitle">Area under cultivation by crop (acres) — real data from farmer profiles</p>
+          {cropDistData.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No crop data available</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie data={cropDistData} cx="50%" cy="50%" innerRadius={60} outerRadius={110} paddingAngle={2} dataKey="value" nameKey="name">
+                  {cropDistData.map((_, i) => <Cell key={i} fill={CHART_COLORS.series[i % CHART_COLORS.series.length]} />)}
+                </Pie>
+                <Tooltip content={<CyaTooltip unit="acres" />} />
+                <Legend iconType="circle" iconSize={8} formatter={v => <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{v}</span>} />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* State Breakdown Bar */}
+        <div className="cya-card">
+          <h3 className="cya-section-title">State Breakdown</h3>
+          <p className="cya-section-subtitle">Total land area by state (acres)</p>
+          {stateData.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No state data available</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={stateData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
+                <XAxis dataKey="state" tick={{ fontSize: 11, fill: CHART_COLORS.axis }} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.axis }} axisLine={false} tickLine={false} width={50} />
+                <Tooltip content={<CyaTooltip unit="ac" />} />
+                <Bar dataKey="area" fill={CHART_COLORS.blue} radius={[4, 4, 0, 0]} name="Area (ac)" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
       <div className="cya-charts-row">
-        {/* Expected vs Actual % */}
+        {/* District Breakdown Bar */}
         <div className="cya-card">
-          <h3 className="cya-section-title">Expected vs Actual</h3>
-          <p className="cya-section-subtitle">Actual production as % of expected (harvested only)</p>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={expVsActData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
-              <XAxis dataKey="crop" tick={{ fontSize: 10, fill: CHART_COLORS.axis }} axisLine={{ stroke: CHART_COLORS.axisLine }} tickLine={false} interval={0} />
-              <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.axis }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} width={50} domain={[0, 'auto']} />
-              <ReferenceLine y={100} stroke={CHART_COLORS.gold} strokeDasharray="6 3" strokeWidth={1.5} label={{ value: '100%', position: 'right', fontSize: 11, fill: CHART_COLORS.gold }} />
-              <Tooltip content={<CyaTooltip unit="%" />} />
-              <Bar dataKey="pct" fill={CHART_COLORS.green} radius={[4, 4, 0, 0]} name="Actual %" />
-            </BarChart>
-          </ResponsiveContainer>
+          <h3 className="cya-section-title">District Breakdown</h3>
+          <p className="cya-section-subtitle">Total land area by district (acres)</p>
+          {districtData.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No district data available</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={districtData} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.grid} vertical={false} />
+                <XAxis dataKey="district" tick={{ fontSize: 11, fill: CHART_COLORS.axis }} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.axis }} axisLine={false} tickLine={false} width={50} />
+                <Tooltip content={<CyaTooltip unit="ac" />} />
+                <Bar dataKey="area" fill={CHART_COLORS.green} radius={[4, 4, 0, 0]} name="Area (ac)" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
-        {/* Harvest Completion */}
+        {/* Crop area table */}
         <div className="cya-card">
-          <h3 className="cya-section-title">Harvest Completion</h3>
-          <p className="cya-section-subtitle">{activeSeason ? activeSeason.name : 'Current season'} — harvested area / total area</p>
-          {harvestProgress.length === 0 ? (
-            <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: 24 }}>No data for this season</p>
-          ) : (
-            <div className="cya-progress-list">
-              {harvestProgress.map(d => (
-                <div className="cya-progress-item" key={d.crop}>
-                  <div className="cya-progress-header">
-                    <span className="cya-progress-label">{d.crop}</span>
-                    <span className="cya-progress-pct">{d.pct}%</span>
-                  </div>
-                  <div className="cya-progress-track">
-                    <div className="cya-progress-fill" style={{
-                      width: `${d.pct}%`,
-                      background: d.pct >= 80 ? CHART_COLORS.green : d.pct >= 40 ? CHART_COLORS.gold : CHART_COLORS.orange,
-                    }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <h3 className="cya-section-title">Crop Area Summary</h3>
+          <p className="cya-section-subtitle">Area planted per crop — {kpis.totalFarmers} farmer{kpis.totalFarmers !== 1 ? 's' : ''} in current view</p>
+          <div className="cya-table-container">
+            <table className="cya-table">
+              <thead>
+                <tr>
+                  <th>Crop</th>
+                  <th>Area (acres)</th>
+                  <th>Share</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cropDistData.length === 0 ? (
+                  <tr><td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 24 }}>No data</td></tr>
+                ) : cropDistData.map(c => (
+                  <tr key={c.name}>
+                    <td style={{ fontWeight: 500 }}>{c.name}</td>
+                    <td>{c.value}</td>
+                    <td>{kpis.totalLand > 0 ? `${+(c.value / kpis.totalLand * 100).toFixed(1)}%` : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </>
@@ -444,6 +417,7 @@ export function CyaTooltip({ active, payload, unit = '' }) {
 }
 
 export function StatusBadge({ status, isProjected }) {
+  if (!status) return <span className="cya-status-badge cya-status--pending">—</span>
   const cls = status.toLowerCase().replace(/\s+/g, '-')
   return (
     <span className={`cya-status-badge cya-status--${cls}`}>
@@ -453,6 +427,7 @@ export function StatusBadge({ status, isProjected }) {
 }
 
 export function ConfidenceBadge({ confidence }) {
+  if (!confidence) return <span className="cya-confidence-badge">—</span>
   const cls = confidence.toLowerCase()
   return <span className={`cya-confidence-badge cya-confidence--${cls}`}>{confidence}</span>
 }
@@ -503,7 +478,7 @@ function NoDataState() {
     <div className="cya-empty" id="cya-empty-state">
       <div className="cya-empty-icon">🌾</div>
       <h3>No yield records available</h3>
-      <p>No crop & yield data has been generated yet.</p>
+      <p>No crop &amp; yield data has been generated yet.</p>
     </div>
   )
 }

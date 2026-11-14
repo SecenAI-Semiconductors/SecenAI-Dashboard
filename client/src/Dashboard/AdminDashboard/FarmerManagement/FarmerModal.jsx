@@ -50,9 +50,8 @@ export function FarmerModal({ farmer, isSubmitting, onSubmit, onClose }) {
       newErrors.fullName = 'Full name is required'
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    // Email is optional for farmers - only validate format if provided
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Enter a valid email address'
     }
 
@@ -133,10 +132,10 @@ export function FarmerModal({ farmer, isSubmitting, onSubmit, onClose }) {
                 )}
               </div>
 
-              {/* Email */}
+              {/* Email (optional)/}
               <div className="fm-form-group">
                 <label className="fm-label" htmlFor="fm-email">
-                  Email *
+                  Email (optional)
                 </label>
                 <input
                   id="fm-email"
@@ -145,7 +144,7 @@ export function FarmerModal({ farmer, isSubmitting, onSubmit, onClose }) {
                   className={`fm-input${errors.email ? ' fm-input--error' : ''}`}
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="farmer@example.com"
+                  placeholder="farmer@example.com (optional)"
                   disabled={isSubmitting}
                 />
                 {errors.email && (
