@@ -18,7 +18,7 @@ const INDIAN_STATES = [
 
 export function CompleteProfilePage() {
   const navigate     = useNavigate()
-  const { setUser }  = useAuth()
+  const { user, setUser }  = useAuth()
 
   const [form, setForm] = useState({
     totalLandArea: '', village: '', district: '', state: '',
@@ -48,7 +48,7 @@ export function CompleteProfilePage() {
         state:     form.state           || undefined,
       })
       setUser(u => ({ ...u, ...res.data }))
-      sessionStorage.setItem('profile_skipped', '1')
+      localStorage.setItem(`profile_skipped_${user.id}`, '1')
       navigate('/farmer', { replace: true })
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save profile.')
@@ -141,7 +141,7 @@ export function CompleteProfilePage() {
           <button
             className="auth-link auth-link--btn"
             onClick={() => {
-              sessionStorage.setItem('profile_skipped', '1')
+              localStorage.setItem(`profile_skipped_${user.id}`, '1')
               navigate('/farmer', { replace: true })
             }}
           >

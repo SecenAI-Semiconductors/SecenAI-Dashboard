@@ -52,17 +52,15 @@ export function FarmerDashboard() {
   const navigate = useNavigate()
   const { user, loading } = useAuth()
 
-  // Redirect to complete-profile only when auth has fully loaded AND the farmer
-  // has never set up their profile at all (no land area AND no crops).
-  // Having crops OR a non-zero land area means the profile is set up — don't interrupt.
+  // Only newly self-registered farmers are asked to complete their profile.
   useEffect(() => {
     if (loading) return   // wait for session-restore to finish
 
-    const hasLand  = user?.totalLandArea && user.totalLandArea > 0
-    const hasCrops = user?.crops && user.crops.length > 0
-    const skipped  = sessionStorage.getItem('profile_skipped')
+    const skipped  = user?.id
+      ? localStorage.getItem(`profile_skipped_${user.id}`)
+      : null
 
-    if (user && user.role === 'farmer' && !hasLand && !hasCrops && !skipped) {
+    if (user && user.role === 'farmer' && user.profileSetupRequired && !skipped) {
       navigate('/complete-profile', { replace: true })
     }
   }, [user, loading, navigate])

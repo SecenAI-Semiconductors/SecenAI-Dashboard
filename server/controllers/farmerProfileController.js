@@ -153,6 +153,8 @@ exports.updateMyProfile = async (req, res) => {
       return res.status(400).json({ message: "No valid fields provided to update" });
     }
 
+    updates.profileSetupRequired = false;
+
     const updated = await User.findByIdAndUpdate(
       userId,
       { $set: updates },
@@ -170,6 +172,7 @@ exports.updateMyProfile = async (req, res) => {
       district:      updated.district      || null,
       state:         updated.state         || null,
       language:      updated.language,
+      profileSetupRequired: updated.profileSetupRequired,
       totalLandArea: updated.totalLandArea,
       crops:         updated.crops,
     });

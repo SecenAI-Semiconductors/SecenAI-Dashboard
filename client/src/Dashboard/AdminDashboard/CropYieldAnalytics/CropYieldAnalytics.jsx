@@ -247,7 +247,10 @@ function OverviewTab({ data, allData, analytics, filterSeason }) {
     // Sum totalLandArea from the farmer list (not crop areas) — crop areas are
     // what's cultivated, totalLandArea is the declared land the farmer owns.
     const farmerListFiltered = (analytics.farmerList || []).filter(f => distinctIds.has(String(f._id)))
-    const totalLand = +farmerListFiltered.reduce((s, f) => s + (f.totalLandArea || 0), 0).toFixed(1)
+    const totalLand = +farmerListFiltered
+      .filter(f => !f.incomplete)
+      .reduce((s, f) => s + (f.totalLandArea || 0), 0)
+      .toFixed(1)
     const incompleteFarmers = farmerListFiltered.filter(f => f.incomplete).length
     const completeFarmers = totalFarmers - incompleteFarmers
     return { totalFarmers, completeFarmers, incompleteFarmers, totalLand }
@@ -287,7 +290,7 @@ function OverviewTab({ data, allData, analytics, filterSeason }) {
         <StatCard title="Complete Profiles"   value={kpis.completeFarmers}   icon="✅"   accent={CHART_COLORS.blue} />
         <StatCard title="Incomplete Profiles" value={kpis.incompleteFarmers} icon="⚠️"  accent={CHART_COLORS.gold} />
         <StatCard title="Total Land (acres)"  value={kpis.totalLand != null ? `${kpis.totalLand} ac` : '—'} icon="🌾" accent={CHART_COLORS.teal} />
-        <StatCard title="Distinct Crops"      value={cropDistData.length}    icon="🌱"  accent={CHART_COLORS.purple} />
+        <StatCard title="Distinct Crop Types" value={cropDistData.length}    icon="🌱"  accent={CHART_COLORS.purple} />
         <StatCard title="Avg Land / Farmer"   value={kpis.completeFarmers > 0 ? `${+(kpis.totalLand / kpis.completeFarmers).toFixed(1)} ac` : '—'} icon="📐" accent={CHART_COLORS.greenDark} />
       </div>
 

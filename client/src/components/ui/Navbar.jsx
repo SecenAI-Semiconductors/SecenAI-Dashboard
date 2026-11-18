@@ -55,6 +55,8 @@ export function Navbar() {
   const location = useLocation()
   const { logout } = useAuth()
 
+  if (location.pathname === '/') return null
+
   const title = ROUTE_TITLES[location.pathname] ?? 'SecenAI'
   const action = getNavAction(location.pathname)
 
