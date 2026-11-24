@@ -14,6 +14,11 @@ const {
   updateMyInsurance,
   deleteMyInsurance,
 } = require("../controllers/insuranceController");
+const {
+  getChatHistory,
+  saveChatHistory,
+  clearChatHistory,
+} = require("../controllers/chatHistoryController");
 
 // Apply auth guards to every route in this file
 router.use(authMiddleware, requireRole("farmer"));
@@ -32,6 +37,11 @@ router.get("/insurance",       getMyInsurance);
 router.get("/insurance/:id",   getMyInsuranceById);
 router.put("/insurance/:id",   updateMyInsurance);
 router.delete("/insurance/:id", deleteMyInsurance);
+
+// ── AI Assistant Chat History (farmer-scoped) ─────────────────────────────
+router.get("/chat-history",    getChatHistory);
+router.put("/chat-history",    saveChatHistory);
+router.delete("/chat-history", clearChatHistory);
 
 module.exports = router;
 

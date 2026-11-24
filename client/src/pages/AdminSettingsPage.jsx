@@ -21,6 +21,8 @@ export function AdminSettingsPage() {
     email:           user?.email    || '',
     currentPassword: '',
   })
+  // Track whether the user deliberately edited the email field
+  const [emailTouched, setEmailTouched] = useState(false)
   const [profileError,   setProfileError]   = useState('')
   const [profileSuccess, setProfileSuccess] = useState('')
   const [profileLoading, setProfileLoading] = useState(false)
@@ -31,8 +33,9 @@ export function AdminSettingsPage() {
       setProfile(p => ({
         ...p,
         name:  p.name  || user.name || user.fullName || '',
-        email: p.email || user.email || '',
+        email: user.email || p.email || '',
       }))
+      setEmailTouched(false)
     }
   }, [user])
 
@@ -46,6 +49,7 @@ export function AdminSettingsPage() {
   function changeProfile(e) {
     const { name, value } = e.target
     setProfile(p => ({ ...p, [name]: value }))
+    if (name === 'email') setEmailTouched(true)
     setProfileError('')
     setProfileSuccess('')
   }
@@ -57,7 +61,7 @@ export function AdminSettingsPage() {
     // Email change requires current password
     const userEmail = (user?.email || '').trim().toLowerCase()
     const inputEmail = profile.email.trim().toLowerCase()
-    const emailChanged = inputEmail !== '' && inputEmail !== userEmail
+    const emailChanged = emailTouched && inputEmail !== '' && inputEmail !== userEmail
 
     if (emailChanged && !profile.currentPassword) {
       setProfileError('Enter your current password to change email.'); return
@@ -76,6 +80,7 @@ export function AdminSettingsPage() {
       setProfileSuccess('Profile saved successfully.')
       setProfileError('')
       setProfile(p => ({ ...p, currentPassword: '' }))
+      setEmailTouched(false)
     } catch (err) {
       setProfileError(err.response?.data?.message || 'Failed to save profile.')
     } finally {
@@ -152,7 +157,7 @@ export function AdminSettingsPage() {
             </div>
 
             {/* Current password required only when email is being changed */}
-            {profile.email.trim().toLowerCase() !== (user?.email || '').trim().toLowerCase() && (
+            {emailTouched && profile.email.trim().toLowerCase() !== (user?.email || '').trim().toLowerCase() && (
               <div className="auth-field">
                 <label className="auth-label" htmlFor="admin-settings-curpw">
                   Current password <span className="auth-optional">(required to change email)</span>
