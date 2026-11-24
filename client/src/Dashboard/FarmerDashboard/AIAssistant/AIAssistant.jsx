@@ -4,13 +4,21 @@
  * Main page component for the AI farming assistant chat interface.
  * Follows the same dashboard-view / dashboard-content layout as
  * WeatherDashboard and other Farmer Dashboard modules.
+ *
+ * Chat history is persisted per farmer account in the database so it
+ * survives page reloads and language switches. Capped at 50 messages.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ChatMessage } from './components/ChatMessage'
 import { ChatInput } from './components/ChatInput'
 import { SuggestedQuestions } from './components/SuggestedQuestions'
-import { sendChatMessage } from './api'
+import {
+  sendChatMessage,
+  loadChatHistory,
+  saveChatHistory,
+  clearChatHistory as clearChatHistoryApi,
+} from './api'
 import {
   WELCOME_MESSAGE,
   ERROR_MESSAGE,
@@ -19,40 +27,109 @@ import {
 } from './utils'
 import './AIAssistant.css'
 
+/** Maximum messages to keep (server also enforces this). */
+const MAX_MESSAGES = 50
+
+/**
+ * Re-trigger Google Translate on newly rendered DOM content.
+ * GTranslate only translates at page load; SPA navigation and dynamic
+ * content (like chat messages loaded from DB) need a manual nudge.
+ */
+function retriggerTranslation() {
+  try {
+    const combo = document.querySelector('.goog-te-combo')
+    if (combo && combo.value && combo.value !== 'en') {
+      combo.dispatchEvent(new Event('change'))
+    }
+  } catch (_) {
+    // GTranslate not loaded or not active — ignore
+  }
+}
+
 export function AIAssistant() {
   const [messages, setMessages] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const chatEndRef = useRef(null)
+  const saveTimeoutRef = useRef(null)
 
-  // Set page title + re-trigger GTranslate for SPA navigation.
-  // GTranslate translates on page load, but client-side React Router
-  // navigation renders new content that GTranslate hasn't processed.
-  // Dispatching a "change" on the hidden Google Translate <select>
-  // forces a re-translation pass over the new DOM content.
+  // ── Load chat history from DB on mount ──
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      const saved = await loadChatHistory()
+      if (cancelled) return
+
+      if (saved.length > 0) {
+        // Restore messages with proper structure
+        const restored = saved.map((m) => ({
+          id: m.id || `restored-${m.timestamp || Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          role: m.role,
+          content: m.content,
+          timestamp: m.timestamp || Date.now(),
+        }))
+        setMessages(restored)
+      }
+      setHistoryLoaded(true)
+
+      // After messages render, retrigger translation so saved messages
+      // appear in the farmer's chosen language
+      setTimeout(retriggerTranslation, 500)
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [])
+
+  // ── Set page title + retrigger GTranslate for SPA navigation ──
   useEffect(() => {
     document.title = 'AI Assistant | SecenAI'
-
-    const timer = setTimeout(() => {
-      try {
-        const combo = document.querySelector('.goog-te-combo')
-        if (combo && combo.value && combo.value !== 'en') {
-          combo.dispatchEvent(new Event('change'))
-        }
-      } catch (_) {
-        // GTranslate not loaded or not active — ignore
-      }
-    }, 300)
-
+    const timer = setTimeout(retriggerTranslation, 300)
     return () => clearTimeout(timer)
   }, [])
 
-  // Auto-scroll to latest message
+  // ── Auto-scroll to latest message ──
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, loading])
+
+  // ── Debounced save to DB (300ms after last message change) ──
+  // Skip the initial load to avoid overwriting with empty state.
+  useEffect(() => {
+    if (!historyLoaded) return
+
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+
+    saveTimeoutRef.current = setTimeout(() => {
+      const toSave = messages.map(({ role, content, timestamp }) => ({
+        role,
+        content,
+        timestamp,
+      }))
+      // Cap before sending (server also caps, but trim here too)
+      const capped = toSave.length > MAX_MESSAGES
+        ? toSave.slice(-MAX_MESSAGES)
+        : toSave
+      saveChatHistory(capped)
+    }, 800)
+
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current)
+    }
+  }, [messages, historyLoaded])
+
+  // ── Retrigger translation whenever messages change ──
+  // So new assistant replies and loaded history get translated.
+  useEffect(() => {
+    if (messages.length > 0) {
+      const timer = setTimeout(retriggerTranslation, 200)
+      return () => clearTimeout(timer)
+    }
+  }, [messages])
 
   const handleSend = useCallback(
     async (text) => {
@@ -70,7 +147,13 @@ export function AIAssistant() {
         const apiHistory = toApiHistory([...messages, userMsg])
         const reply = await sendChatMessage(messageText, apiHistory)
         const assistantMsg = createMessage('assistant', reply)
-        setMessages((prev) => [...prev, assistantMsg])
+        setMessages((prev) => {
+          const updated = [...prev, assistantMsg]
+          // Cap locally too
+          return updated.length > MAX_MESSAGES
+            ? updated.slice(-MAX_MESSAGES)
+            : updated
+        })
       } catch (err) {
         console.error('AI Assistant error:', err)
         const errorMsg = createMessage('assistant', ERROR_MESSAGE)
@@ -85,6 +168,11 @@ export function AIAssistant() {
   function handleSuggestedQuestion(question) {
     if (loading) return
     handleSend(question)
+  }
+
+  function handleClearChat() {
+    setMessages([])
+    clearChatHistoryApi()
   }
 
   const isEmpty = messages.length === 0
@@ -150,10 +238,24 @@ export function AIAssistant() {
 
           {/* Suggested questions (after conversation has started) */}
           {!isEmpty && !loading && (
-            <SuggestedQuestions
-              onSelect={handleSuggestedQuestion}
-              disabled={loading}
-            />
+            <div className="ai-chat-bottom-actions">
+              <SuggestedQuestions
+                onSelect={handleSuggestedQuestion}
+                disabled={loading}
+              />
+              <button
+                type="button"
+                className="ai-clear-chat-btn"
+                onClick={handleClearChat}
+                title="Clear chat history"
+                id="ai-clear-chat-btn"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                Clear
+              </button>
+            </div>
           )}
 
           {/* Input */}
